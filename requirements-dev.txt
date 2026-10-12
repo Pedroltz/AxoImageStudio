@@ -1,0 +1,9 @@
+# Local UI/regression checks only. Colab inference dependencies are installed by the notebook.
+gradio==4.40.0
+gradio-client==1.2.0
+fastapi==0.127.1
+pydantic==2.10.6
+Pillow==10.4.0
+huggingface-hub==0.36.2
+nbformat==5.10.4
+pytest==8.3.5

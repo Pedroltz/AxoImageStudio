@@ -1,0 +1,56 @@
+.axo-header { display:flex; align-items:center; justify-content:space-between; background:#08090d; border:1px solid #362735; border-radius:22px; overflow:hidden; margin:8px 0 18px; min-height:210px; }
+.axo-brand { padding:28px 36px; position:relative; z-index:1; }
+.axo-eyebrow { color:#e6a6c3; font:600 10px/1.5 system-ui,sans-serif; letter-spacing:.19em; }
+.axo-header h2 { font:750 clamp(25px,3.4vw,44px)/1.1 system-ui,sans-serif !important; letter-spacing:-.045em; color:#fff; margin:14px 0 10px !important; }
+.axo-header h2 span { color:#ff91b9; }
+.axo-header p { color:#bcb5c5; margin:0 0 20px; font-size:15px; }
+.axo-header a { color:#f7d2e1 !important; font-size:13px; text-decoration:none; }
+.axo-header a:hover { text-decoration:underline; }
+.axo-mascot { width:270px; height:220px; overflow:hidden; flex-shrink:0; background:#000; }
+.axo-mascot img { height:100%; width:100%; object-fit:cover; object-position:right; max-width:none; display:block; }
+#axo-toolbar { align-items:end; margin-bottom:14px; }
+#axo-refresh { background:#ef90b6 !important; color:#24131d !important; border:1px solid #ef90b6 !important; font-weight:700; }
+#axo-workspace { gap:18px; }
+#axo-gallery, #axo-preview { border:1px solid #42323e; border-radius:16px; overflow:hidden; }
+#axo-gallery .thumbnail-item { border-radius:10px; }
+#axo-gallery .thumbnail-item:hover { border-color:#ed91b5; }
+#axo-gallery .thumbnail-item.selected { outline:2px solid #ed91b5; outline-offset:-2px; }
+#axo-pagination { align-items:center; }
+#axo-pagination .prose { text-align:center; font-size:12px; }
+.axo-details { display:flex; flex-direction:column; gap:5px; padding:5px 2px 10px; overflow-wrap:anywhere; }
+.axo-details strong { font-size:14px; }
+.axo-details span { color:var(--body-text-color-subdued,#aaa); font-size:12px; }
+#tab_axo_studio button:focus-visible, .axo-header a:focus-visible { outline:2px solid #ff91b9; outline-offset:3px; }
+@media(max-width:700px) { .axo-brand { padding:24px 20px; } .axo-mascot { width:150px; height:160px; } .axo-header { min-height:180px; } .axo-eyebrow { font-size:8px; } #axo-workspace > .gradio-column { min-width:min(100%,300px) !important; } }
+@media(max-width:440px) { .axo-mascot { width:110px; height:130px; } .axo-header h2 span { display:block; } }
+
+#axo-gallery .grid-container { grid-template-columns:repeat(auto-fill,minmax(min(140px,100%),1fr)) !important; gap:8px; }
+#axo-gallery .thumbnail-item { aspect-ratio:1 / 1; }
+
+/* Axo Guide knowledge base: scoped to its own components. */
+.axo-wiki-header { display:flex; justify-content:space-between; align-items:center; gap:20px; background:linear-gradient(115deg,#100e15,#251320); border:1px solid #543143; border-radius:20px; padding:25px 30px; margin:8px 0 20px; }
+.axo-wiki-header > div > span { color:#efa7c5; font-size:10px; font-weight:700; letter-spacing:.16em; }
+.axo-wiki-header h2 { color:#fff; font-size:clamp(22px,3vw,34px); letter-spacing:-.035em; margin:10px 0 !important; }
+.axo-wiki-header p { color:#cbbac7; margin:0; font-size:14px; }
+.axo-wiki-badge { display:flex; flex-direction:column; align-items:center; background:#ffffff08; border:1px solid #694257; padding:14px 20px; border-radius:14px; flex-shrink:0; }
+.axo-wiki-badge strong { color:#ff9bc3; font-size:32px; line-height:1.1; }
+.axo-wiki-badge span { letter-spacing:0 !important; font-size:11px !important; margin-top:4px; }
+#axo-wiki-layout { gap:24px; align-items:flex-start; }
+#axo-wiki-sidebar { padding:16px; border:1px solid var(--border-color-primary,#493545); border-radius:14px; }
+#axo-wiki-search { background:#ed92b5 !important; color:#24111b !important; border-color:#ed92b5 !important; font-weight:700; }
+#axo-wiki-status .prose { font-size:12px; }
+#axo-wiki-topics > div { max-height:490px; overflow-y:auto; flex-direction:column; flex-wrap:nowrap; gap:6px; }
+#axo-wiki-topics label { width:100%; box-sizing:border-box; font-size:12px; line-height:1.5; padding:9px 10px; }
+#axo-wiki-tip .prose { font-size:12px; opacity:.8; }
+#axo-wiki-article { border:1px solid var(--border-color-primary,#493545); border-radius:16px; padding:24px 28px; min-height:500px; overflow-wrap:anywhere; }
+#axo-wiki-article .prose { max-width:none; font-size:15px; line-height:1.75; }
+#axo-wiki-article h1 { font-size:28px; line-height:1.25; letter-spacing:-.025em; margin:10px 0 24px; }
+#axo-wiki-article h2 { font-size:19px; margin:26px 0 12px; }
+#axo-wiki-article th { text-align:left; }
+#axo-wiki-article table { display:block; max-width:100%; overflow-x:auto; font-size:13px; }
+#axo-wiki-article td, #axo-wiki-article th { padding:10px 12px; vertical-align:top; }
+#axo-wiki-article pre { overflow-x:auto; font-size:13px; }
+#axo-wiki-article a { color:var(--link-text-color,#f39dbf); }
+#axo-wiki-navigation { margin-bottom:4px; }
+@media(min-width:1000px) { #axo-wiki-sidebar { position:sticky; top:20px; } }
+@media(max-width:700px) { .axo-wiki-header { padding:20px; } .axo-wiki-badge { padding:10px 12px; } #axo-wiki-article { padding:18px; } #axo-wiki-article h1 { font-size:23px; } #axo-wiki-sidebar { width:100%; } #axo-wiki-topics > div { max-height:240px; } }
