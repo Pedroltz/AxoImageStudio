@@ -45,4 +45,4 @@ Scene/backdrop: freshwater aquarium habitat with smooth dark river stones, soft 
 
 ## Sugestão de legenda
 
-“Explorando três direções visuais para a identidade do Axo Image Studio: mascote 3D, fantasia ilustrada e fotografia subaquática. As artes foram geradas com IA para a apresentação; a captura da interface mostra o projeto em funcionamento.”
+“Explorando três direções visuais para a identidade do Axo Image Studio: mascote 3D, fantasia ilustrada e fotografia subaquática. As artes foram geradas com IA para a apresentação; a captura mostra a interface do Axo Guide em uma prévia local.”

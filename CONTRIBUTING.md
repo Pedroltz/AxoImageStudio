@@ -4,6 +4,11 @@ O notebook é o arquivo de distribuição. As fontes editáveis ficam em `axo_la
 
 ## Ambiente de desenvolvimento
 
+```bash
+git clone https://github.com/Pedroltz/AxoImageStudio.git
+cd AxoImageStudio
+```
+
 Use **Python 3.12** para manter compatibilidade com as versões utilizadas pelo projeto. Os testes da interface não precisam de GPU nem baixam modelos.
 
 ```bash
@@ -47,13 +52,8 @@ As verificações cobrem comportamentos da galeria e da wiki, incluindo a regres
 
 Para uma mudança no instalador ou nos modelos, valide também no Colab: inicialização, seleção de módulos, uma geração pequena, visualização, download e persistência no Drive quando habilitada.
 
-## Publicar o repositório depois
+## Enviar uma alteração
 
-Este projeto foi preparado como um repositório **local**, sem envio ao GitHub. Quando quiser publicá-lo, crie um repositório vazio na sua conta e configure o endereço dele como `origin`:
+Use uma branch para a mudança, regenere o notebook se necessário e execute as verificações antes de abrir um pull request no [repositório](https://github.com/Pedroltz/AxoImageStudio). O GitHub Actions repete as verificações da interface e do notebook.
 
-```bash
-git remote add origin https://github.com/SEU_USUARIO/axo-image-studio.git
-git push -u origin main
-```
-
-Substitua `SEU_USUARIO` pelo nome da sua conta. A documentação já usa caminhos relativos para funcionar no GitHub. Modelos, imagens geradas, ambientes locais, logs e credenciais estão excluídos pelo `.gitignore`.
+Modelos, imagens geradas na sessão, ambientes locais, logs e credenciais estão excluídos pelo `.gitignore`. As artes de apresentação são arquivos explícitos em `docs/demos`, com sua origem documentada.
