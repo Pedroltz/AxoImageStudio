@@ -1,5 +1,13 @@
 # Problemas comuns
 
+## Banner do notebook não aparece
+
+O banner no início do notebook usa uma célula de texto com uma imagem PNG pública do repositório. Ele aparece ao abrir o arquivo, sem executar uma célula de código ou conectar à GPU.
+
+Se estiver usando uma cópia antiga no Drive, abra o [notebook atualizado](https://colab.research.google.com/github/Pedroltz/AxoImageStudio/blob/main/Axo_Image_Studio.ipynb) e salve uma nova cópia. A primeira célula antiga era uma célula de código; por isso, o banner dependia da execução dela.
+
+Se a imagem ainda não carregar, confira se você consegue abrir o [PNG do banner](https://raw.githubusercontent.com/Pedroltz/AxoImageStudio/main/docs/assets/axo-banner.png). O notebook precisa conseguir acessar essa imagem pública.
+
 ## Miniaturas, prévia ou download com erro
 
 1. Clique em **Atualizar** na galeria e confira a pasta de saída configurada.
