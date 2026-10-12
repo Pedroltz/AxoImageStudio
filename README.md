@@ -6,6 +6,8 @@
 
 [Começar no Colab](#começar-no-colab) · [Wiki completa](docs/AXO_GUIDE.md) · [Arquitetura](docs/ARCHITECTURE.md) · [Desenvolvimento](CONTRIBUTING.md)
 
+As [três artes e seus prompts para apresentação](docs/demos/PROMPTS.md) exploram a identidade visual do projeto. Foram criadas com um gerador externo à aplicação; não são resultados de uma execução do Axo ou do Forge.
+
 ## O projeto
 
 Gerar imagens envolve muitos controles: modelos, prompts, samplers, steps, CFG e extensões. O Axo Image Studio reúne um ambiente de criação, uma biblioteca para explorar os resultados e um guia que explica esses controles durante o uso.
