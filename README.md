@@ -65,6 +65,51 @@ Com `USE_GOOGLE_DRIVE = True`, modelos e imagens ficam em `MyDrive/Axo-Image-Stu
 
 Se um download do Civitai exigir autenticação, use os **Segredos do Colab** com o nome `CIVITAI_TOKEN`.
 
+### Prompts em linguagem natural (opcional)
+
+Marque `ENABLE_PROMPT_ENHANCER` na célula de instalação. A extensão
+[Prompt Enhancer](https://github.com/Gunther-Schulz/sd-webui-prompt-enhancer)
+transforma descrições e instruções em prompts por meio do Ollama. Ela começa
+**desativada**, para manter os downloads e o consumo de memória habituais.
+
+| Opção | Comportamento |
+|---|---|
+| `PROMPT_ENHANCER_BACKEND = 'local'` | Instala Ollama `v0.40.3`, inicia no Colab em CPU e baixa o modelo antes de abrir o Forge |
+| `PROMPT_ENHANCER_BACKEND = 'external'` | Usa um servidor Ollama já acessível pelo Colab; não instala Ollama nem baixa modelos |
+| `PROMPT_ENHANCER_API_URL` | URL base do Ollama; no modo local, use `http://127.0.0.1:11434` |
+| `PROMPT_ENHANCER_MODEL` | Modelo Ollama, inicialmente `qwen3:4b`; pode escolher outro modelo conforme a RAM disponível |
+
+No modo local, a primeira execução baixa também o pacote Ollama (~1,4 GB)
+e os pesos do LLM (vários GB). O modelo 4b é uma escolha de menor consumo;
+qualidade e velocidade precisam ser avaliadas para seus prompts. O upstream
+recomenda um modelo 9b, que exige mais RAM. A execução em CPU pode demorar;
+os limites de espera são 60 segundos sem tokens e 300 segundos por chamada.
+Ollama fica restrito à interface local, sem acesso à GPU, e libera o modelo
+após a chamada. Veja as [configurações oficiais do Ollama](https://docs.ollama.com/faq).
+
+No modo externo, baixe o modelo no servidor previamente (`ollama pull NOME`).
+A URL precisa ser acessível **a partir do Colab**: `localhost` não aponta para
+seu computador pessoal. Use uma URL base sem `/api/chat`, credenciais ou
+parâmetros; a extensão não oferece campos de autenticação. Os prompts são
+enviados ao servidor escolhido.
+
+Abra **Prompt Enhancer** em **txt2img** ou **img2img**, escreva em **Source Prompt**
+e clique em **Enhance**. Revise o texto no campo principal e então clique em
+**Generate** no Forge. **Edit** altera um prompt existente; **Keep LoRAs** mantém
+os tokens LoRA. Escolha a **Base** apropriada ao modelo de imagem: a extensão
+não troca automaticamente sua base quando você muda entre SDXL e Anima.
+
+Com Drive habilitado, os pesos Ollama ficam em `models/Ollama` e os arquivos
+YAML pessoais em `prompt-enhancer`, dentro da pasta do Axo no Drive. Sem Drive,
+eles duram apenas a sessão. A pasta de YAML é criada antes de carregar a
+extensão; os modelos Qwen do Ollama são separados do encoder Qwen do Anima.
+
+**Restart** inicia novamente Ollama e Forge. Interromper a célula encerra os
+serviços iniciados pelo Axo; um servidor externo continua ativo. Para desativar
+ou alterar backend/modelo/URL, interrompa e execute **Install and launch** com
+as novas opções. As opções atualizam apenas os padrões API URL/Model da
+extensão; as demais configurações da interface são preservadas.
+
 ### Atualizar ou reiniciar
 
 Para aplicar mudanças do notebook, interrompa o Forge e execute **Install and launch** novamente. Para reiniciar na mesma instalação, use **Restart**. Downloads já concluídos são reaproveitados.
@@ -99,7 +144,7 @@ Veja [CONTRIBUTING.md](CONTRIBUTING.md) para editar a interface, atualizar o not
 
 ## Validação e limites
 
-A correção da galeria foi confirmada em uso no Colab. Os **21 testes locais** verificam carregamento em abas Gradio, filtros, paginação, prévias, metadados, download original, ZIP, busca e navegação da wiki. Também verificam se o notebook contém as mesmas fontes mantidas no repositório. Um teste adicional em JavaScript verifica a atualização ao entrar e retornar à aba.
+A correção da galeria foi confirmada em uso no Colab. Os testes locais verificam carregamento em abas Gradio, filtros, paginação, prévias, metadados, download original, ZIP, busca e navegação da wiki. Também verificam se o notebook contém as mesmas fontes mantidas no repositório. Um teste adicional em JavaScript verifica a atualização ao entrar e retornar à aba.
 
 Os testes locais não geram imagens com GPU. A inferência completa e todas as combinações de modelos/extensões ainda precisam de testes específicos. A referência de pose do Anima é experimental. A captura acima mostra o guia; as imagens usadas nos testes são sintéticas.
 

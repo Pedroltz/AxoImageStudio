@@ -36,3 +36,13 @@ Escolha o preset `anima`, o checkpoint correspondente e os módulos `qwen_3_06b_
 ## Imagens desaparecem após encerrar a sessão
 
 O armazenamento `/content` é temporário. Ative `USE_GOOGLE_DRIVE` antes de iniciar para persistir modelos e imagens em `MyDrive/Axo-Image-Studio-Forge`.
+
+## Prompt Enhancer e Ollama
+
+- **Painel ausente:** marque `ENABLE_PROMPT_ENHANCER` e execute a instalação novamente. A validação exige o painel em txt2img e img2img; consulte `forge.log` se falhar.
+- **Ollama não inicia:** consulte `ollama.log` na pasta raiz do Axo. A porta 11434 deve estar livre no modo local; escolha `external` para usar um serviço existente.
+- **Modelo indisponível:** no modo externo, execute `ollama pull NOME` no servidor e confira o nome/tag no notebook. O modo local baixa o modelo antes do Forge.
+- **URL inacessível:** use a URL base alcançável pelo Colab, sem `/api/chat`. Um Ollama no seu PC não é o localhost do Colab.
+- **Sem RAM ou resposta lenta:** escolha um LLM menor ou um backend externo. `LOW_VRAM` afeta o Forge, não a RAM usada pelo LLM em CPU. Para voltar ao fluxo habitual, desmarque a extensão e execute a instalação novamente.
+- **Timeout/truncamento:** reduza a descrição e os modificadores, desative Think e tente novamente. CPU pode ultrapassar os limites de 60 s sem tokens ou 300 s totais. Use um servidor externo mais rápido se necessário.
+- **YAML personalizado:** use a pasta `prompt-enhancer` na raiz do Axo. Novos arquivos exigem reiniciar o Forge; Reload atualiza o conteúdo de grupos existentes.
