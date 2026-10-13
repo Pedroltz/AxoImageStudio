@@ -11,9 +11,15 @@ ENABLE_GALLERY = True #@param {type:'boolean'}
 LOW_VRAM = True #@param {type:'boolean'}
 ENABLE_ADETAILER_BY_DEFAULT = True #@param {type:'boolean'}
 FORCE_FP32 = False #@param {type:'boolean'}
+ENABLE_PROMPT_ENHANCER = False #@param {type:'boolean'}
+PROMPT_ENHANCER_BACKEND = 'local' #@param ['local', 'external']
+PROMPT_ENHANCER_API_URL = 'http://127.0.0.1:11434' #@param {type:'string'}
+PROMPT_ENHANCER_MODEL = 'huihui_ai/qwen3.5-abliterated:9b' #@param {type:'string'}
+PROMPT_ENHANCER_BASE = 'Auto' #@param ['Auto', 'Axo SDXL - PT-BR', 'Axo Anima - PT-BR', 'Default']
 
 import ast
 import io
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -42,6 +48,11 @@ EXTENSION_REVISIONS = {
     'ADetailer-Neo': ('https://github.com/Haoming02/ADetailer-Neo.git', 'af228eba7a3f3691a25bcd1fc94aa95e600dd3e6'),
     'sd-webui-civbrowser': ('https://github.com/SignalFlagZ/sd-webui-civbrowser.git', '7c9c32040722ee125cebb9bc3c9454322b14a2a3'),
 }
+PROMPT_ENHANCER_NAME = 'sd-webui-prompt-enhancer'
+PROMPT_ENHANCER_REPO = 'https://github.com/Gunther-Schulz/sd-webui-prompt-enhancer.git'
+PROMPT_ENHANCER_REVISION = '349f28e61780472816b9f688dc2af635eee35e8f'
+OLLAMA_VERSION = 'v0.40.3'
+OLLAMA_HOME = Path('/content/axo-ollama')
 CIVITAI_TOKEN = ''
 NOTICES = []
 PROCESSES = globals().get('AXO_FORGE_PROCESSES', [])
@@ -58,6 +69,11 @@ def child_environment(overrides=None):
                AXO_GALLERY_CACHE='/content/axo-forge-gallery-cache',
                AXO_MODEL_ROOT=str(MODELS), AXO_ENABLE_GALLERY='1' if ENABLE_GALLERY else '0',
                AXO_ADETAILER_DEFAULT='1' if ENABLE_ADETAILER_BY_DEFAULT else '0')
+    if ENABLE_PROMPT_ENHANCER:
+        env['PROMPT_ENHANCER_LOCAL'] = ','.join(map(str, (
+            ROOT / 'prompt-enhancer-axo', ROOT / 'prompt-enhancer')))
+        env['PROMPT_ENHANCER_STALL_TIMEOUT'] = '60'
+        env['PROMPT_ENHANCER_MAX_TIME'] = '300'
     if PYTHON.is_file():
         env['VIRTUAL_ENV'] = str(RUNTIME)
         env['PATH'] = str(RUNTIME / 'bin') + ':' + env.get('PATH', '')
@@ -185,7 +201,130 @@ def prepare_webui():
     if LANGUAGE == 'pt-BR':
         clone_at('https://github.com/M-art-ucci/stable-diffusion-webui-localization-pt_BR.git',
                  EXTENSIONS / 'axo-localization-pt-BR')
+    prepare_prompt_enhancer()
     install_axo_workspace()
+
+
+def prepare_prompt_enhancer():
+    if not ENABLE_PROMPT_ENHANCER:
+        return
+    if PROMPT_ENHANCER_BACKEND not in {'local', 'external'}:
+        raise ValueError('Prompt Enhancer backend must be local or external.')
+    parsed = urlparse(PROMPT_ENHANCER_API_URL)
+    if (parsed.scheme not in {'http', 'https'} or not parsed.hostname
+            or parsed.path not in {'', '/'} or parsed.query or parsed.fragment
+            or parsed.username or parsed.password):
+        raise ValueError('Use an Ollama base URL, without credentials or an API path.')
+    if not PROMPT_ENHANCER_MODEL.strip() or PROMPT_ENHANCER_MODEL.startswith('-'):
+        raise ValueError('Choose a nonempty Ollama model name.')
+    if PROMPT_ENHANCER_BACKEND == 'local' and PROMPT_ENHANCER_API_URL.rstrip('/') != 'http://127.0.0.1:11434':
+        raise ValueError('Local Ollama uses http://127.0.0.1:11434; select external for another URL.')
+    if PROMPT_ENHANCER_BASE not in {'Auto', 'Axo SDXL - PT-BR', 'Axo Anima - PT-BR', 'Default'}:
+        raise ValueError('Choose a supported Prompt Enhancer base.')
+    base = PROMPT_ENHANCER_BASE
+    if base == 'Auto':
+        base = 'Axo Anima - PT-BR' if START_WITH == 'Anima' else 'Axo SDXL - PT-BR'
+    clone_at(PROMPT_ENHANCER_REPO, EXTENSIONS / PROMPT_ENHANCER_NAME, PROMPT_ENHANCER_REVISION)
+    # Upstream has hardcoded defaults, not environment settings. Adapt their
+    # assignments and Base UI defaults; fail if the pinned contract changes.
+    script = EXTENSIONS / PROMPT_ENHANCER_NAME / 'scripts/prompt_enhancer.py'
+    source = script.read_text(encoding='utf-8')
+    for key, value in {'DEFAULT_API_URL': PROMPT_ENHANCER_API_URL.rstrip('/'),
+                       'DEFAULT_MODEL': PROMPT_ENHANCER_MODEL}.items():
+        source, count = re.subn(r'^' + key + r' = [^\n]*',
+                               lambda match: key + ' = ' + repr(value), source, flags=re.M)
+        if count != 1:
+            raise RuntimeError('Prompt Enhancer default assignment changed: ' + key)
+    # Neo's saved-dropdown validator compares tuple labels rather than values.
+    # Seed the actual Base value too, so decorated labels cannot block Auto.
+    patterns = (
+        (r'(base = gr\.Dropdown\([^\n]*?value=)[^,\n]+', repr(base)),
+        (r'(base_description = gr\.HTML\(value=_base_description_html\()[^)]*', repr(base)),
+    )
+    for pattern, value in patterns:
+        source, count = re.subn(pattern, lambda match: match.group(1) + value, source)
+        if count != 1:
+            raise RuntimeError('Prompt Enhancer Base UI contract changed.')
+    script.write_text(source, encoding='utf-8')
+    (ROOT / 'prompt-enhancer').mkdir(parents=True, exist_ok=True)
+    managed = ROOT / 'prompt-enhancer-axo'
+    managed.mkdir(parents=True, exist_ok=True)
+    files = globals().get('AXO_EXTENSION_FILES')
+    for name in ('_bases.yaml', '_prompts.yaml'):
+        relative = 'assets/prompt-enhancer/' + name
+        content = (files[relative] if files is not None else
+                   (Path(__file__).resolve().parent / 'extension' / relative).read_text(encoding='utf-8'))
+        (managed / name).write_text(content, encoding='utf-8')
+    # ui-config.json overrides component defaults on subsequent launches.
+    path = WEBUI / 'ui-config.json'
+    config = json.loads(path.read_text()) if path.is_file() else {}
+    for tab in ('txt2img', 'img2img'):
+        for field, value in {'API URL': PROMPT_ENHANCER_API_URL.rstrip('/'),
+                             'Model': PROMPT_ENHANCER_MODEL, 'Base': base}.items():
+            config[f'customscript/prompt_enhancer.py/{tab}/{field}/value'] = value
+    path.write_text(json.dumps(config, ensure_ascii=False, indent=2))
+
+
+def check_prompt_backend():
+    base = PROMPT_ENHANCER_API_URL.rstrip('/')
+    response = requests.get(base + '/api/tags', timeout=10)
+    response.raise_for_status()
+    models = {item['name'] for item in response.json().get('models', [])}
+    selected = PROMPT_ENHANCER_MODEL
+    if selected not in models and selected + ':latest' not in models:
+        raise RuntimeError('Ollama model unavailable: ' + selected + '. Pull it on the server first.')
+
+
+def start_prompt_backend():
+    if not ENABLE_PROMPT_ENHANCER:
+        return
+    if PROMPT_ENHANCER_BACKEND == 'external':
+        check_prompt_backend()
+        return
+    with socket.socket() as sock:
+        sock.settimeout(1)
+        if sock.connect_ex(('127.0.0.1', 11434)) == 0:
+            raise RuntimeError('Port 11434 is busy. Select external to use an existing Ollama server.')
+    binary = OLLAMA_HOME / 'bin/ollama'
+    marker = OLLAMA_HOME / 'axo-version'
+    if not binary.is_file() or not marker.is_file() or marker.read_text() != OLLAMA_VERSION:
+        OLLAMA_HOME.mkdir(parents=True, exist_ok=True)
+        archive = OLLAMA_HOME / 'ollama.tar.zst'
+        urllib.request.urlretrieve(
+            f'https://github.com/ollama/ollama/releases/download/{OLLAMA_VERSION}/ollama-linux-amd64.tar.zst', archive)
+        digest = hashlib.sha256()
+        with archive.open('rb') as downloaded:
+            for chunk in iter(lambda: downloaded.read(1024 * 1024), b''):
+                digest.update(chunk)
+        if digest.hexdigest() != 'ce6f8b671a699bf1ebafb28d60dbbabf4f37b30b499145fa308a8ba72de021d6':
+            archive.unlink()
+            raise RuntimeError('Ollama archive checksum mismatch; rerun to download again.')
+        # Colab's GNU tar uses the zstd executable for this official archive.
+        run(['apt-get', 'install', '-y', 'zstd'])
+        run(['tar', '--zstd', '-xf', archive, '-C', OLLAMA_HOME])
+        archive.unlink()
+        marker.write_text(OLLAMA_VERSION)
+    env = child_environment({'OLLAMA_HOST': '127.0.0.1:11434',
+        'OLLAMA_MODELS': str(MODELS / 'Ollama'), 'OLLAMA_KEEP_ALIVE': '0',
+        'OLLAMA_NO_CLOUD': '1', 'CUDA_VISIBLE_DEVICES': '-1', 'ROCR_VISIBLE_DEVICES': '-1'})
+    with (ROOT / 'ollama.log').open('a') as log:
+        process = subprocess.Popen([str(binary), 'serve'], env=env, stdout=log, stderr=subprocess.STDOUT)
+    PROCESSES.append(process)
+    deadline = time.monotonic() + 60
+    while time.monotonic() < deadline:
+        if process.poll() is not None:
+            raise RuntimeError('Ollama exited. Inspect ollama.log.')
+        try:
+            response = requests.get(PROMPT_ENHANCER_API_URL.rstrip('/') + '/api/version', timeout=2)
+            if response.ok:
+                break
+        except requests.RequestException:
+            pass
+        time.sleep(1)
+    else:
+        raise RuntimeError('Ollama startup timed out. Inspect ollama.log.')
+    run([binary, 'pull', PROMPT_ENHANCER_MODEL], env=env)
+    check_prompt_backend()
 
 
 def install_dependencies():
@@ -198,6 +337,8 @@ def install_dependencies():
          'gradio==4.40.0', 'gradio_rangeslider==0.0.8', 'requests', 'colorama',
          'Send2Trash', 'ultralytics==8.3.253', 'mediapipe==0.10.35',
          'matplotlib', 'onnxruntime', 'timm', 'addict', 'ftfy', 'fvcore', 'svglib', 'yapf', 'onnx'])
+    if ENABLE_PROMPT_ENHANCER:
+        run([PYTHON, '-m', 'pip', 'install', 'PyYAML==6.0.2'])
     # Run the upstream startup installers before attempting a public launch.
     run([PYTHON, '-u', 'launch.py', '--model-ref', MODELS,
          '--skip-python-version-check', '--exit'], cwd=WEBUI)
@@ -213,6 +354,10 @@ def install_dependencies():
     (ROOT / 'runtime-info.json').write_text(json.dumps({
         **data, 'forge_revision': FORGE_REVISION, 'extensions': EXTENSION_REVISIONS,
         'python': str(PYTHON), 'language': LANGUAGE,
+        'prompt_enhancer': {'enabled': ENABLE_PROMPT_ENHANCER,
+            'revision': PROMPT_ENHANCER_REVISION, 'backend': PROMPT_ENHANCER_BACKEND,
+            'model': PROMPT_ENHANCER_MODEL, 'base': PROMPT_ENHANCER_BASE,
+            'ollama_version': OLLAMA_VERSION},
     }, indent=2))
 
 
@@ -281,6 +426,10 @@ def configure_workspace():
     disabled = config.get('disabled_extensions', [])
     required = {'ADetailer-Neo', 'sd-webui-civbrowser', 'axo-image-studio', 'sd_forge_controlnet',
                 'sd_forge_controlllite', 'forge_legacy_preprocessors'}
+    if ENABLE_PROMPT_ENHANCER:
+        required.add(PROMPT_ENHANCER_NAME)
+    elif (EXTENSIONS / PROMPT_ENHANCER_NAME).exists():
+        disabled = list(disabled) + [PROMPT_ENHANCER_NAME]
     config['disabled_extensions'] = [name for name in disabled if Path(name).name not in required]
     for key, folder in {
         'outdir_txt2img_samples':'txt2img', 'outdir_img2img_samples':'img2img',
@@ -300,7 +449,7 @@ def install_axo_workspace():
     if files is None:
         base = Path(__file__).resolve().parent / 'extension'
         files = {str(p.relative_to(base)): p.read_text() for p in base.rglob('*')
-                 if p.is_file() and p.suffix in {'.py', '.js', '.css', '.b64'}}
+                 if p.is_file() and p.suffix in {'.py', '.js', '.css', '.b64', '.yaml'}}
     for relative, content in files.items():
         file = target / relative
         file.parent.mkdir(parents=True, exist_ok=True)
@@ -345,15 +494,28 @@ def validate_running_ui():
         raise RuntimeError('CivBrowser failed to load. Inspect forge.log above.')
     if ENABLE_GALLERY and not any(c.get('props', {}).get('elem_id') == 'axo-gallery' for c in ui.get('components', [])):
         raise RuntimeError('Axo Studio gallery failed to load. Inspect forge.log.')
+    if ENABLE_PROMPT_ENHANCER:
+        ids = {c.get('props', {}).get('elem_id') for c in ui.get('components', [])}
+        if not {'txt2img_pe_source', 'img2img_pe_source'} <= ids:
+            raise RuntimeError('Prompt Enhancer failed to load in both tabs. Inspect forge.log.')
     print('Verified: ControlNet, ADetailer, CivBrowser and enabled Axo Studio panels loaded.', flush=True)
 
 
 def launch_webui():
     stop()
-    process = subprocess.Popen([str(x) for x in launch_arguments()], cwd=WEBUI,
-                               env=child_environment(), stdout=subprocess.PIPE,
-                               stderr=subprocess.STDOUT, text=True, encoding='utf-8',
-                               errors='replace', bufsize=1)
+    try:
+        start_prompt_backend()
+    except BaseException:
+        stop()
+        raise
+    try:
+        process = subprocess.Popen([str(x) for x in launch_arguments()], cwd=WEBUI,
+                                   env=child_environment(), stdout=subprocess.PIPE,
+                                   stderr=subprocess.STDOUT, text=True, encoding='utf-8',
+                                   errors='replace', bufsize=1)
+    except BaseException:
+        stop()
+        raise
     PROCESSES.append(process)
     def stream():
         with (ROOT / 'forge.log').open('a', encoding='utf-8') as log:

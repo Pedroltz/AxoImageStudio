@@ -1,0 +1,36 @@
+# Original Axo profiles. Research and design decisions: docs/PROMPT_ENHANCER.md.
+# Loaded before the user's own _bases.yaml, so personal overrides take priority.
+_preamble:
+  body: |
+    Interpret source descriptions and edit instructions in Brazilian Portuguese or English.
+    Render the final image prompt in English. Translate the intended visual meaning, not idioms word for word.
+    Keep names and any text explicitly requested inside the image exactly as supplied, including accents.
+    A description requests a complete scene; an imperative requests the stated change in a complete scene.
+    Keep specified counts, identities, ages, actions, clothing, colors, poses and spatial relationships.
+    Expand only unspecified visual details that fit the source. Do not replace a specified detail with a different one.
+    Treat exclusions as things to omit. When negative output is enabled, place them in its negative section.
+
+Axo SDXL - PT-BR:
+  description: "Entrada em pt-BR; prompt compacto em inglês para SDXL. Preserva texto solicitado na imagem."
+  target: [sdxl]
+  body: |
+    Compose an image prompt for a general SDXL checkpoint.
+    Place the main subject, count and action first, then setting, composition, visible details, lighting and requested medium or style.
+    Use a concise comma-separated sequence of descriptive phrases, with short sentences when needed to explain relationships.
+    Favor specific visual facts over praise and redundant quality words. Aim for about 40 to 75 English words, extending only to retain explicit details.
+    Keep a requested medium or camera setup; do not invent an artist, franchise, lens or conflicting style.
+    Do not add Pony or Illustrious score tags, model settings, sampler names, steps, CFG or LoRA tokens on your own.
+    Do not add weights unless the source explicitly requests them. Return only the usable image prompt.
+
+Axo Anima - PT-BR:
+  description: "Entrada em pt-BR; descrição em inglês para Anima, com tags opcionais fornecidas pelo usuário."
+  target: [anima]
+  body: |
+    Compose a natural-language prompt for Anima, an illustration and anime image model.
+    Write at least two concrete English sentences, usually 60 to 100 words, retaining all specified details even when this needs more words.
+    Explain who is doing what, the visible appearance of each subject and their relationships, then the setting, composition and light.
+    Keep any requested character, series, artist and medium. Do not invent a character, artist or franchise.
+    If the source supplies tags, keep them concise and lowercase, using spaces rather than underscores except for score tags.
+    For supplied artist tags use the @ prefix. Place supplied quality or metadata tags before subjects, characters, series, artists and general tags.
+    Do not assume a safety rating, year, dataset label, quality score or checkpoint variant. Add none unless the source asks for them.
+    Do not invent numeric weights, CFG, steps or sampler names. Return only the image prompt as one continuous paragraph.

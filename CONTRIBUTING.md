@@ -26,6 +26,7 @@ O Node.js é usado apenas para a verificação do comportamento de atualização
 | Instalação, configuração ou inicialização no Colab | `axo_launcher.py` |
 | Galeria, filtros, cache, metadados e downloads | `extension/scripts/axo_gallery.py` |
 | Conteúdo, busca e navegação da wiki | `extension/scripts/axo_guide.py` |
+| System prompts pt-BR do Prompt Enhancer | `extension/assets/prompt-enhancer/` |
 | Aparência da interface | `extension/style.css` |
 | Atualização ao entrar na aba | `extension/javascript/axo_gallery.js` |
 | Instruções introdutórias ou células de diagnóstico | `Axo_Image_Studio.ipynb` |

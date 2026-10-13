@@ -45,3 +45,34 @@ O Axo Guide mantém 29 artigos em português no arquivo `axo_guide.py`. A busca 
 ## Limite da validação local
 
 Os testes carregam a interface Gradio com módulos de inferência simulados. Eles verificam as operações de biblioteca e navegação. A execução de modelos continua dependendo do Colab, da GPU, dos pesos e das extensões efetivamente instaladas.
+
+## Prompt Enhancer opcional
+
+O launcher clona a extensão em uma revisão fixa, instala PyYAML 6.0.2 no
+Python isolado e adapta DEFAULT_API_URL, DEFAULT_MODEL e os valores iniciais de Base/descrição do upstream
+(que não expõe variáveis de ambiente para esses padrões). Os pontos de adaptação
+são verificados e a adaptação é idempotente. As entradas correspondentes de
+ui-config.json usam o prefixo customscript/prompt_enhancer.py do Forge para
+atualizar os padrões também em instalações reaproveitadas.
+
+Ordem: checkout/adaptação → dependências e instaladores Forge --exit → modelos
+de imagem → config.json → Ollama pronto e modelo disponível → Forge público →
+validação dos componentes em ambas as abas. O modo externo verifica /api/tags
+sem instalar ou encerrar o servidor. O modo local usa um arquivo oficial fixo
+com checksum, CPU, loopback e armazenamento em models/Ollama. O processo é
+registrado antes da espera de prontidão para permitir limpeza em falhas.
+O Restart passa pela mesma inicialização; stop encerra Forge antes de Ollama.
+Desativar a opção mantém os arquivos, mas inclui a extensão em disabled_extensions.
+
+A validação local cobre configuração, isolamento da GPU, reexecução, falhas e
+componentes obrigatórios sem inferência. O teste manual do upstream com Gradio
+4.40 cria os dois painéis com módulos Forge simulados. Uma sessão Colab com
+GPU ainda precisa confirmar Enhance/Edit/Cancel, geração SDXL/Anima, LoRAs,
+ControlNet, ADetailer, galeria e persistência após reconexão.
+
+As bases Axo pt-BR em extension/assets/prompt-enhancer são YAMLs originais,
+incorporados ao notebook. prepare_prompt_enhancer grava-os em uma pasta
+própria carregada antes da pasta de overrides pessoais, sem substituir arquivos
+do usuário. O valor Auto seleciona a base correspondente a START_WITH na
+instalação; não há acompanhamento automático das mudanças de checkpoint na UI.
+Os detalhes da pesquisa e os limites estão em PROMPT_ENHANCER.md.
