@@ -14,7 +14,8 @@ FORCE_FP32 = False #@param {type:'boolean'}
 ENABLE_PROMPT_ENHANCER = False #@param {type:'boolean'}
 PROMPT_ENHANCER_BACKEND = 'local' #@param ['local', 'external']
 PROMPT_ENHANCER_API_URL = 'http://127.0.0.1:11434' #@param {type:'string'}
-PROMPT_ENHANCER_MODEL = 'qwen3:4b' #@param {type:'string'}
+PROMPT_ENHANCER_MODEL = 'huihui_ai/qwen3.5-abliterated:9b' #@param {type:'string'}
+PROMPT_ENHANCER_BASE = 'Auto' #@param ['Auto', 'Axo SDXL - PT-BR', 'Axo Anima - PT-BR', 'Default']
 
 import ast
 import io
@@ -69,7 +70,8 @@ def child_environment(overrides=None):
                AXO_MODEL_ROOT=str(MODELS), AXO_ENABLE_GALLERY='1' if ENABLE_GALLERY else '0',
                AXO_ADETAILER_DEFAULT='1' if ENABLE_ADETAILER_BY_DEFAULT else '0')
     if ENABLE_PROMPT_ENHANCER:
-        env['PROMPT_ENHANCER_LOCAL'] = str(ROOT / 'prompt-enhancer')
+        env['PROMPT_ENHANCER_LOCAL'] = ','.join(map(str, (
+            ROOT / 'prompt-enhancer-axo', ROOT / 'prompt-enhancer')))
         env['PROMPT_ENHANCER_STALL_TIMEOUT'] = '60'
         env['PROMPT_ENHANCER_MAX_TIME'] = '300'
     if PYTHON.is_file():
@@ -217,9 +219,14 @@ def prepare_prompt_enhancer():
         raise ValueError('Choose a nonempty Ollama model name.')
     if PROMPT_ENHANCER_BACKEND == 'local' and PROMPT_ENHANCER_API_URL.rstrip('/') != 'http://127.0.0.1:11434':
         raise ValueError('Local Ollama uses http://127.0.0.1:11434; select external for another URL.')
+    if PROMPT_ENHANCER_BASE not in {'Auto', 'Axo SDXL - PT-BR', 'Axo Anima - PT-BR', 'Default'}:
+        raise ValueError('Choose a supported Prompt Enhancer base.')
+    base = PROMPT_ENHANCER_BASE
+    if base == 'Auto':
+        base = 'Axo Anima - PT-BR' if START_WITH == 'Anima' else 'Axo SDXL - PT-BR'
     clone_at(PROMPT_ENHANCER_REPO, EXTENSIONS / PROMPT_ENHANCER_NAME, PROMPT_ENHANCER_REVISION)
-    # Upstream has hardcoded defaults, not environment settings. Adapt only
-    # these two assignments; fail visibly if the pinned source contract changes.
+    # Upstream has hardcoded defaults, not environment settings. Adapt their
+    # assignments and Base UI defaults; fail if the pinned contract changes.
     script = EXTENSIONS / PROMPT_ENHANCER_NAME / 'scripts/prompt_enhancer.py'
     source = script.read_text(encoding='utf-8')
     for key, value in {'DEFAULT_API_URL': PROMPT_ENHANCER_API_URL.rstrip('/'),
@@ -228,14 +235,32 @@ def prepare_prompt_enhancer():
                                lambda match: key + ' = ' + repr(value), source, flags=re.M)
         if count != 1:
             raise RuntimeError('Prompt Enhancer default assignment changed: ' + key)
+    # Neo's saved-dropdown validator compares tuple labels rather than values.
+    # Seed the actual Base value too, so decorated labels cannot block Auto.
+    patterns = (
+        (r'(base = gr\.Dropdown\([^\n]*?value=)[^,\n]+', repr(base)),
+        (r'(base_description = gr\.HTML\(value=_base_description_html\()[^)]*', repr(base)),
+    )
+    for pattern, value in patterns:
+        source, count = re.subn(pattern, lambda match: match.group(1) + value, source)
+        if count != 1:
+            raise RuntimeError('Prompt Enhancer Base UI contract changed.')
     script.write_text(source, encoding='utf-8')
     (ROOT / 'prompt-enhancer').mkdir(parents=True, exist_ok=True)
+    managed = ROOT / 'prompt-enhancer-axo'
+    managed.mkdir(parents=True, exist_ok=True)
+    files = globals().get('AXO_EXTENSION_FILES')
+    for name in ('_bases.yaml', '_prompts.yaml'):
+        relative = 'assets/prompt-enhancer/' + name
+        content = (files[relative] if files is not None else
+                   (Path(__file__).resolve().parent / 'extension' / relative).read_text(encoding='utf-8'))
+        (managed / name).write_text(content, encoding='utf-8')
     # ui-config.json overrides component defaults on subsequent launches.
     path = WEBUI / 'ui-config.json'
     config = json.loads(path.read_text()) if path.is_file() else {}
     for tab in ('txt2img', 'img2img'):
         for field, value in {'API URL': PROMPT_ENHANCER_API_URL.rstrip('/'),
-                             'Model': PROMPT_ENHANCER_MODEL}.items():
+                             'Model': PROMPT_ENHANCER_MODEL, 'Base': base}.items():
             config[f'customscript/prompt_enhancer.py/{tab}/{field}/value'] = value
     path.write_text(json.dumps(config, ensure_ascii=False, indent=2))
 
@@ -331,7 +356,8 @@ def install_dependencies():
         'python': str(PYTHON), 'language': LANGUAGE,
         'prompt_enhancer': {'enabled': ENABLE_PROMPT_ENHANCER,
             'revision': PROMPT_ENHANCER_REVISION, 'backend': PROMPT_ENHANCER_BACKEND,
-            'model': PROMPT_ENHANCER_MODEL, 'ollama_version': OLLAMA_VERSION},
+            'model': PROMPT_ENHANCER_MODEL, 'base': PROMPT_ENHANCER_BASE,
+            'ollama_version': OLLAMA_VERSION},
     }, indent=2))
 
 
@@ -423,7 +449,7 @@ def install_axo_workspace():
     if files is None:
         base = Path(__file__).resolve().parent / 'extension'
         files = {str(p.relative_to(base)): p.read_text() for p in base.rglob('*')
-                 if p.is_file() and p.suffix in {'.py', '.js', '.css', '.b64'}}
+                 if p.is_file() and p.suffix in {'.py', '.js', '.css', '.b64', '.yaml'}}
     for relative, content in files.items():
         file = target / relative
         file.parent.mkdir(parents=True, exist_ok=True)

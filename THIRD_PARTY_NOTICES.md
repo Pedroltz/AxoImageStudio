@@ -10,6 +10,7 @@ O Axo Image Studio personaliza e integra ferramentas existentes. O motor de gera
 | CivBrowser | Navegação e download de modelos | [SignalFlagZ/sd-webui-civbrowser](https://github.com/SignalFlagZ/sd-webui-civbrowser) |
 | Prompt Enhancer (MIT) | Expansão e edição de prompts via Ollama | [Gunther-Schulz/sd-webui-prompt-enhancer](https://github.com/Gunther-Schulz/sd-webui-prompt-enhancer) |
 | Ollama (MIT) | Serviço opcional de linguagem em CPU | [ollama/ollama](https://github.com/ollama/ollama) |
+| Qwen3.5 9B abliterated | LLM opcional de prompts; variante com recusas reduzidas | [huihui_ai/qwen3.5-abliterated:9b](https://ollama.com/huihui_ai/qwen3.5-abliterated:9b) |
 | Localização pt-BR | Tradução da interface base | [M-art-ucci/stable-diffusion-webui-localization-pt_BR](https://github.com/M-art-ucci/stable-diffusion-webui-localization-pt_BR) |
 | Gradio | Componentes e transporte da interface | [gradio-app/gradio](https://github.com/gradio-app/gradio) |
 | PyTorch | Execução de modelos na GPU | [pytorch/pytorch](https://github.com/pytorch/pytorch) |
@@ -29,3 +30,5 @@ O Axo Image Studio personaliza e integra ferramentas existentes. O motor de gera
 O notebook baixa esses componentes na sessão do Colab. O repositório distribui a extensão Axo e o instalador, sem os pesos de modelos e sem uma cópia completa do Forge. Outros pesos e pré-processadores baixados pelo instalador têm referências no código e continuam sujeitos às condições de seus autores.
 
 Os exemplos da wiki são orientações didáticas; resultados e configurações dependem do modelo. A arte de identidade visual foi preservada do notebook fornecido para este projeto; a captura de interface em `docs/assets` mostra o Axo Guide.
+
+As bases YAML Axo são instruções próprias, com referências da comunidade e decisões documentadas em [docs/PROMPT_ENHANCER.md](docs/PROMPT_ENHANCER.md).

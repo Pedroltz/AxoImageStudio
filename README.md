@@ -77,12 +77,13 @@ transforma descrições e instruções em prompts por meio do Ollama. Ela começ
 | `PROMPT_ENHANCER_BACKEND = 'local'` | Instala Ollama `v0.40.3`, inicia no Colab em CPU e baixa o modelo antes de abrir o Forge |
 | `PROMPT_ENHANCER_BACKEND = 'external'` | Usa um servidor Ollama já acessível pelo Colab; não instala Ollama nem baixa modelos |
 | `PROMPT_ENHANCER_API_URL` | URL base do Ollama; no modo local, use `http://127.0.0.1:11434` |
-| `PROMPT_ENHANCER_MODEL` | Modelo Ollama, inicialmente `qwen3:4b`; pode escolher outro modelo conforme a RAM disponível |
+| `PROMPT_ENHANCER_BASE` | `Auto` escolhe a base pt-BR para a família inicial SDXL ou Anima; também permite escolha explícita |
+| `PROMPT_ENHANCER_MODEL` | Modelo Ollama, inicialmente `huihui_ai/qwen3.5-abliterated:9b`; configurável conforme a RAM disponível |
 
 No modo local, a primeira execução baixa também o pacote Ollama (~1,4 GB)
-e os pesos do LLM (vários GB). O modelo 4b é uma escolha de menor consumo;
-qualidade e velocidade precisam ser avaliadas para seus prompts. O upstream
-recomenda um modelo 9b, que exige mais RAM. A execução em CPU pode demorar;
+e os pesos do LLM (~6,6 GB para o 9b escolhido). A variante abliterated tem
+recusas reduzidas e é recomendada pelo upstream; a qualidade em pt-BR ainda
+precisa ser avaliada. O 9b exige mais RAM que o antigo padrão 4b. A execução em CPU pode demorar;
 os limites de espera são 60 segundos sem tokens e 300 segundos por chamada.
 Ollama fica restrito à interface local, sem acesso à GPU, e libera o modelo
 após a chamada. Veja as [configurações oficiais do Ollama](https://docs.ollama.com/faq).
@@ -96,8 +97,10 @@ enviados ao servidor escolhido.
 Abra **Prompt Enhancer** em **txt2img** ou **img2img**, escreva em **Source Prompt**
 e clique em **Enhance**. Revise o texto no campo principal e então clique em
 **Generate** no Forge. **Edit** altera um prompt existente; **Keep LoRAs** mantém
-os tokens LoRA. Escolha a **Base** apropriada ao modelo de imagem: a extensão
-não troca automaticamente sua base quando você muda entre SDXL e Anima.
+os tokens LoRA. A base inicial é escolhida pelo notebook. Escreva em **pt-BR**: os perfis
+Axo retornam um prompt em inglês e preservam textos solicitados dentro da
+imagem. Ao trocar SDXL/Anima na WebUI, troque também **Base**. Veja a
+[pesquisa da comunidade, perfis e personalização](docs/PROMPT_ENHANCER.md).
 
 Com Drive habilitado, os pesos Ollama ficam em `models/Ollama` e os arquivos
 YAML pessoais em `prompt-enhancer`, dentro da pasta do Axo no Drive. Sem Drive,
@@ -107,7 +110,7 @@ extensão; os modelos Qwen do Ollama são separados do encoder Qwen do Anima.
 **Restart** inicia novamente Ollama e Forge. Interromper a célula encerra os
 serviços iniciados pelo Axo; um servidor externo continua ativo. Para desativar
 ou alterar backend/modelo/URL, interrompa e execute **Install and launch** com
-as novas opções. As opções atualizam apenas os padrões API URL/Model da
+as novas opções. As opções atualizam os padrões API URL/Model/Base da
 extensão; as demais configurações da interface são preservadas.
 
 ### Atualizar ou reiniciar

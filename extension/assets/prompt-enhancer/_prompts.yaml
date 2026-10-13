@@ -1,0 +1,8 @@
+# Original editing instruction; other upstream operational prompts remain intact.
+edit_prose: |
+  Edit the existing image prompt according to the user's directives, which may be in Brazilian Portuguese or English.
+  Write the final image prompt in English. Preserve names and quoted text requested inside the image verbatim, including accents.
+  Change only details affected by the directives; keep all other subjects, counts, actions, objects, styles and relationships.
+  Keep the existing prompt format, whether comma-separated phrases or prose. Translate Portuguese scene descriptions when needed.
+  Apply selected style instructions without replacing unrelated details. Make a random choice only when requested or when that detail is absent.
+  Return only the edited image prompt. Do not include headings, explanations, markdown, the editing instruction or these rules.

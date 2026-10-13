@@ -20,7 +20,7 @@ def build():
     files = {
         path.relative_to(base).as_posix(): path.read_text(encoding='utf-8')
         for path in sorted(base.rglob('*'))
-        if path.is_file() and path.suffix in {'.py', '.js', '.css', '.b64'}
+        if path.is_file() and path.suffix in {'.py', '.js', '.css', '.b64', '.yaml'}
     }
     lines = source.splitlines(keepends=True)
     lines[assignment.lineno - 1:assignment.end_lineno] = [

@@ -28,7 +28,9 @@ def launcher(tmp_path):
 def seed_extension(launcher):
     script = launcher['EXTENSIONS'] / launcher['PROMPT_ENHANCER_NAME'] / 'scripts/prompt_enhancer.py'
     script.parent.mkdir(parents=True)
-    script.write_text('DEFAULT_API_URL = "http://localhost:11434"\nDEFAULT_MODEL = "old"\n')
+    script.write_text('DEFAULT_API_URL = "http://localhost:11434"\nDEFAULT_MODEL = "old"\n'
+                      'base = gr.Dropdown(label="Base", value="Default", scale=1)\n'
+                      'base_description = gr.HTML(value=_base_description_html("Default"))\n')
     launcher['clone_at'] = Mock()
     return script
 
@@ -41,11 +43,11 @@ def test_setup_is_pinned_idempotent_and_preserves_ui_settings(launcher):
     launcher['prepare_prompt_enhancer']()
     launcher['clone_at'].assert_called_with(launcher['PROMPT_ENHANCER_REPO'],
         launcher['EXTENSIONS'] / launcher['PROMPT_ENHANCER_NAME'], launcher['PROMPT_ENHANCER_REVISION'])
-    assert "DEFAULT_MODEL = 'qwen3:4b'" in script.read_text()
+    assert "DEFAULT_MODEL = 'huihui_ai/qwen3.5-abliterated:9b'" in script.read_text()
     config = json.loads(path.read_text())
     assert config['unrelated/value'] == 42
     for tab in ('txt2img', 'img2img'):
-        assert config[f'customscript/prompt_enhancer.py/{tab}/Model/value'] == 'qwen3:4b'
+        assert config[f'customscript/prompt_enhancer.py/{tab}/Model/value'] == 'huihui_ai/qwen3.5-abliterated:9b'
     assert (launcher['ROOT'] / 'prompt-enhancer').is_dir()
 
 
@@ -67,7 +69,7 @@ def test_disabled_mode_does_no_backend_work(launcher):
 
 def test_external_backend_checks_model_without_local_install(launcher):
     response = Mock()
-    response.json.return_value = {'models': [{'name': 'qwen3:4b'}]}
+    response.json.return_value = {'models': [{'name': 'huihui_ai/qwen3.5-abliterated:9b'}]}
     launcher.update(PROMPT_ENHANCER_BACKEND='external', requests=Mock(), run=Mock())
     launcher['requests'].get.return_value = response
     launcher['start_prompt_backend']()
@@ -115,7 +117,7 @@ def test_local_backend_cpu_environment_readiness_and_pull(launcher, monkeypatch)
     popen = Mock(return_value=process)
     monkeypatch.setattr(launcher['subprocess'], 'Popen', popen)
     response = Mock(ok=True)
-    response.json.return_value = {'models': [{'name': 'qwen3:4b'}]}
+    response.json.return_value = {'models': [{'name': 'huihui_ai/qwen3.5-abliterated:9b'}]}
     launcher.update(requests=Mock(), run=Mock())
     launcher['requests'].get.return_value = response
     launcher['start_prompt_backend']()
@@ -125,7 +127,7 @@ def test_local_backend_cpu_environment_readiness_and_pull(launcher, monkeypatch)
     assert env['OLLAMA_HOST'] == '127.0.0.1:11434'
     assert env['OLLAMA_MODELS'] == str(launcher['MODELS'] / 'Ollama')
     assert launcher['PROCESSES'] == [process]
-    launcher['run'].assert_called_once_with([binary, 'pull', 'qwen3:4b'], env=env)
+    launcher['run'].assert_called_once_with([binary, 'pull', 'huihui_ai/qwen3.5-abliterated:9b'], env=env)
 
 
 def test_ui_validation_requires_enhancer_in_both_tabs(launcher):
@@ -161,3 +163,45 @@ def test_yaml_installed_before_forge_preflight_and_dependency_check(launcher, mo
     check_index = next(i for i, args in enumerate(commands) if args[-2:] == ['pip', 'check'])
     assert yaml_index < preflight_index < check_index
     assert json.loads((launcher['ROOT'] / 'runtime-info.json').read_text())['prompt_enhancer']['enabled']
+
+
+@pytest.mark.parametrize('family, expected', [('SDXL', 'Axo SDXL - PT-BR'), ('Anima', 'Axo Anima - PT-BR')])
+def test_auto_base_matches_starting_family_and_preserves_personal_yaml(launcher, family, expected):
+    seed_extension(launcher)
+    launcher['START_WITH'] = family
+    personal = launcher['ROOT'] / 'prompt-enhancer'
+    personal.mkdir()
+    overrides = personal / '_bases.yaml'
+    overrides.write_text('My Base: personal instructions\n')
+    launcher['prepare_prompt_enhancer']()
+    script = launcher['EXTENSIONS'] / launcher['PROMPT_ENHANCER_NAME'] / 'scripts/prompt_enhancer.py'
+    assert 'value=' + repr(expected) in script.read_text()
+    assert '_base_description_html(' + repr(expected) + ')' in script.read_text()
+    assert overrides.read_text() == 'My Base: personal instructions\n'
+    managed = launcher['ROOT'] / 'prompt-enhancer-axo'
+    for name in ('_bases.yaml', '_prompts.yaml'):
+        assert (managed / name).read_text() == (ROOT / 'extension/assets/prompt-enhancer' / name).read_text()
+    config = json.loads((launcher['WEBUI'] / 'ui-config.json').read_text())
+    for tab in ('txt2img', 'img2img'):
+        assert config[f'customscript/prompt_enhancer.py/{tab}/Base/value'] == expected
+    assert launcher['child_environment']()['PROMPT_ENHANCER_LOCAL'].split(',') == [str(managed), str(personal)]
+
+
+def test_explicit_base_overrides_initial_family(launcher):
+    seed_extension(launcher)
+    launcher.update(START_WITH='Anima', PROMPT_ENHANCER_BASE='Axo SDXL - PT-BR')
+    launcher['prepare_prompt_enhancer']()
+    config = json.loads((launcher['WEBUI'] / 'ui-config.json').read_text())
+    assert config['customscript/prompt_enhancer.py/txt2img/Base/value'] == 'Axo SDXL - PT-BR'
+
+
+def test_prompt_assets_are_valid_upstream_yaml_mappings():
+    import yaml
+    base = ROOT / 'extension/assets/prompt-enhancer'
+    profiles = yaml.safe_load((base / '_bases.yaml').read_text())
+    assert set(profiles) == {'_preamble', 'Axo SDXL - PT-BR', 'Axo Anima - PT-BR'}
+    assert all(isinstance(entry['body'], str) and entry['body'].strip() for entry in profiles.values())
+    assert profiles['Axo SDXL - PT-BR']['target'] == ['sdxl']
+    assert profiles['Axo Anima - PT-BR']['target'] == ['anima']
+    prompts = yaml.safe_load((base / '_prompts.yaml').read_text())
+    assert set(prompts) == {'edit_prose'}

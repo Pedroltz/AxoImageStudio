@@ -19,7 +19,7 @@ def test_notebook_matches_sources():
     base = ROOT / 'extension'
     expected = {p.relative_to(base).as_posix(): p.read_text(encoding='utf-8')
                 for p in base.rglob('*')
-                if p.is_file() and p.suffix in {'.py', '.js', '.css', '.b64'}}
+                if p.is_file() and p.suffix in {'.py', '.js', '.css', '.b64', '.yaml'}}
     assert files == expected
 
 
