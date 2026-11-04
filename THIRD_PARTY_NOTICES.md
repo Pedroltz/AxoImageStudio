@@ -5,6 +5,9 @@ O Axo Image Studio personaliza e integra ferramentas existentes. O motor de gera
 | Componente | Papel | Referência |
 |---|---|---|
 | Forge Neo | Interface base e inferência | [Haoming02/sd-webui-forge-classic](https://github.com/Haoming02/sd-webui-forge-classic) |
+| ComfyUI | Interface de nós e inferência alternativa | [Comfy-Org/ComfyUI](https://github.com/Comfy-Org/ComfyUI) |
+| Workflows ComfyUI | Referência para o starter Anima básico, sem Turbo | [Workflow oficial Anima](https://github.com/Comfy-Org/workflow_templates/blob/main/templates/image_anima_base_v1.json) |
+| cloudflared | Túnel temporário de acesso ao ComfyUI | [cloudflare/cloudflared](https://github.com/cloudflare/cloudflared) |
 | Stable Diffusion WebUI | Recursos e sintaxe herdados pelo Forge | [AUTOMATIC1111/stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui) |
 | ADetailer Neo | Detalhamento automático | [Haoming02/ADetailer-Neo](https://github.com/Haoming02/ADetailer-Neo) |
 | CivBrowser | Navegação e download de modelos | [SignalFlagZ/sd-webui-civbrowser](https://github.com/SignalFlagZ/sd-webui-civbrowser) |
@@ -19,6 +22,8 @@ O Axo Image Studio personaliza e integra ferramentas existentes. O motor de gera
 | Projeto | Commit |
 |---|---|
 | Forge Neo | `bd1d015950b62f1c88a6d95f0b9ea1e0dfc69aa3` |
+| ComfyUI | `5f415e31abfd837870bbc733ba1e158de71ed985` |
+| cloudflared | Release `2026.10.0`, binário Linux amd64 verificado por SHA256 |
 | ADetailer Neo | `af228eba7a3f3691a25bcd1fc94aa95e600dd3e6` |
 | CivBrowser | `7c9c32040722ee125cebb9bc3c9454322b14a2a3` |
 

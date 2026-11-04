@@ -1,4 +1,5 @@
-#@title ▶ Install and launch Axo Image Studio — Forge Neo { display-mode: "form" }
+#@title ▶ Install and launch Axo Image Studio { display-mode: "form" }
+INTERFACE = 'Forge Neo' #@param ['Forge Neo', 'ComfyUI']
 LANGUAGE = 'pt-BR' #@param ['en', 'pt-BR']
 START_WITH = 'SDXL' #@param ['SDXL', 'Anima']
 USE_GOOGLE_DRIVE = False #@param {type:'boolean'}
@@ -50,6 +51,8 @@ GPU_BF16 = False
 
 def child_environment(overrides=None):
     env = os.environ.copy()
+    if INTERFACE == 'ComfyUI':
+        env.pop('PIP_CONSTRAINT', None)
     if overrides:
         env.update(overrides)
     env.update(MPLBACKEND='Agg', PYTHONUNBUFFERED='1',
@@ -62,13 +65,13 @@ def child_environment(overrides=None):
         env['VIRTUAL_ENV'] = str(RUNTIME)
         env['PATH'] = str(RUNTIME / 'bin') + ':' + env.get('PATH', '')
     constraint = ROOT / 'constraints.txt'
-    if constraint.is_file():
+    if constraint.is_file() and INTERFACE == 'Forge Neo':
         env['PIP_CONSTRAINT'] = str(constraint)
     # Do not inherit A1111 or another notebook's dependency overrides.
     for key in ('REQS_FILE', 'TORCH_COMMAND', 'GRADIO_PACKAGE', 'COMMANDLINE_ARGS', 'PYTHONPATH', 'PYTHONHOME'):
         env.pop(key, None)
     compat = ROOT / 'forge-requirements.txt'
-    if compat.is_file():
+    if compat.is_file() and INTERFACE == 'Forge Neo':
         env['REQS_FILE'] = str(compat)
     return env
 
@@ -159,8 +162,9 @@ def check_gpu():
     print('GPU:', result.stdout.strip(), flush=True)
     with socket.socket() as sock:
         sock.settimeout(1)
-        if sock.connect_ex(('127.0.0.1', 7860)) == 0:
-            raise RuntimeError('Port 7860 is busy. Stop the other notebook before launching Forge.')
+        port = 8188 if INTERFACE == 'ComfyUI' else 7860
+        if sock.connect_ex(('127.0.0.1', port)) == 0:
+            raise RuntimeError(f'Port {port} is busy. Stop the other notebook before launching.')
 
 
 def prepare_webui():
@@ -229,19 +233,20 @@ def download_models():
                  MODELS / 'text_encoder/qwen_3_06b_base.safetensors')
         download(base + 'vae/qwen_image_vae.safetensors',
                  MODELS / 'VAE/qwen_image_vae.safetensors')
-    download(hf + 'madebyollin/sdxl-vae-fp16-fix/resolve/main/sdxl_vae.safetensors',
-             MODELS / 'VAE/sdxl_vae_fp16_fix.safetensors')
-    if DOWNLOAD_CONTROLNET_SDXL:
+    if INTERFACE == 'Forge Neo' or DOWNLOAD_SDXL_BASE:
+        download(hf + 'madebyollin/sdxl-vae-fp16-fix/resolve/main/sdxl_vae.safetensors',
+                 MODELS / 'VAE/sdxl_vae_fp16_fix.safetensors')
+    if DOWNLOAD_CONTROLNET_SDXL and INTERFACE == 'Forge Neo':
         for name in ('sai_xl_canny_256lora', 'sai_xl_depth_256lora', 'thibaud_xl_openpose_256lora'):
             download(hf + 'lllyasviel/sd_control_collection/resolve/main/' + name + '.safetensors',
                      MODELS / 'ControlNet/SDXL' / (name + '.safetensors'))
-    if DOWNLOAD_ANIMA_POSE:
+    if DOWNLOAD_ANIMA_POSE and INTERFACE == 'Forge Neo':
         download(hf + 'kohya-ss/Anima-LLLite/resolve/main/anima-lllite-pose-1.safetensors',
                  MODELS / 'ControlNet/Anima/anima-lllite-pose-1.safetensors')
-    for name in ('face_yolov8n.pt', 'hand_yolov8n.pt', 'person_yolov8n-seg.pt'):
+    for name in (() if INTERFACE == 'ComfyUI' else ('face_yolov8n.pt', 'hand_yolov8n.pt', 'person_yolov8n-seg.pt')):
         download(hf + 'Bingsu/adetailer/resolve/main/' + name,
                  MODELS / 'adetailer' / name, file_format='torch')
-    if PRELOAD_POSE_DETECTORS:
+    if PRELOAD_POSE_DETECTORS and INTERFACE == 'Forge Neo':
         for name in ('yolox_l.onnx', 'dw-ll_ucoco_384.onnx'):
             download(hf + 'yzd-v/DWPose/resolve/main/' + name,
                      MODELS / 'ControlNetPreprocessor/openpose' / name, file_format='onnx')
@@ -386,15 +391,27 @@ def launch_webui():
 
 
 def start():
-    global AXO_FORGE_PROCESSES
+    global AXO_FORGE_PROCESSES, RUNTIME, PYTHON, AXO_ACTIVE_INTERFACE
     AXO_FORGE_PROCESSES = PROCESSES
     stop()
+    if INTERFACE not in ('Forge Neo', 'ComfyUI'):
+        raise ValueError('Choose Forge Neo or ComfyUI.')
+    AXO_ACTIVE_INTERFACE = INTERFACE
+    RUNTIME = Path('/content/axo-comfy-runtime-py312' if INTERFACE == 'ComfyUI'
+                   else '/content/axo-forge-runtime-py312')
+    PYTHON = RUNTIME / 'bin/python'
     check_gpu()
     prepare_paths()
     load_download_dependencies()
     read_colab_token()
     print('[1/6] Preparing Python 3.12…', flush=True)
     ensure_runtime()
+    if INTERFACE == 'ComfyUI':
+        prepare_comfy()
+        download_models()
+        configure_comfy()
+        launch_comfy()
+        return
     print('[2/6] Installing Forge Neo and extensions…', flush=True)
     prepare_webui()
     print('[3/6] Installing CUDA/runtime dependencies…', flush=True)
@@ -579,6 +596,21 @@ def connect_browser_token(config):
     NOTICES.append('Could not detect the API key setting in this CivBrowser version. Enter it under Settings → CivBrowser for authenticated downloads.')
 
 AXO_EXTENSION_FILES = None  # Embedded by tools/build_notebook.py
+AXO_COMFY_FILES = None  # Embedded by tools/build_notebook.py
+
+# Execute the maintained backend in this notebook's namespace, so it shares
+# download helpers and process cleanup without requiring a repository checkout.
+if AXO_COMFY_FILES is not None:
+    exec(compile(AXO_COMFY_FILES['backend.py'], 'comfy_backend/backend.py', 'exec'))
+
+
+def restart_interface():
+    if globals().get('AXO_ACTIVE_INTERFACE') != INTERFACE:
+        raise RuntimeError('Interface changed. Run Install and launch to prepare it first.')
+    if INTERFACE == 'ComfyUI':
+        launch_comfy()
+    else:
+        launch_webui()
 
 try:
     start()

@@ -2,7 +2,7 @@
 
 **Crie, explore e entenda suas imagens.** Um estúdio para Google Colab com galeria própria e uma wiki integrada em português, personalizado por **Pedroltz** sobre o Forge Neo.
 
-[![Abrir no Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Pedroltz/AxoImageStudio/blob/main/Axo_Image_Studio.ipynb)
+[![Abrir no Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Pedroltz/AxoImageStudio/blob/main/Axo_Image_Studio.ipynb#scrollTo=axo-install-launch)
 [![Verificações da interface e do notebook](https://github.com/Pedroltz/AxoImageStudio/actions/workflows/validate.yml/badge.svg)](https://github.com/Pedroltz/AxoImageStudio/actions/workflows/validate.yml)
 
 ![Prévia do Axo Guide: busca, índice de artigos e explicação de samplers](docs/assets/axo-guide.jpg)
@@ -44,13 +44,23 @@ Essas artes foram geradas com uma ferramenta externa para a apresentação do pr
 
 ## Começar no Colab
 
+### Escolher a interface
+
+Na célula **Install and launch**, o dropdown `INTERFACE` permite escolher **Forge Neo** (padrão) ou **ComfyUI**. O seletor `START_WITH` oferece **SDXL** e **Anima** nas duas opções. Execute apenas uma interface por vez; para trocar, interrompa a célula, altere o dropdown e execute a instalação novamente. **Restart** reutiliza a interface instalada.
+
+No ComfyUI, abra o link `trycloudflare.com` exibido no fim da inicialização. Os workflows **Axo Anima** e **Axo SDXL** ficam no menu Workflows; o starter selecionado abre em um navegador novo quando o editor está vazio. Se já houver um grafo aberto, escolha o workflow no menu. Edite o prompt e clique em **Run**. Não há geração automática ao abrir.
+
+O ComfyUI usa um ambiente Python separado e reaproveita os pesos existentes. Downloads desativados continuam desativados: o notebook informa os arquivos ausentes. As imagens são salvas em `outputs/ComfyUI` e os workflows em `comfy-user`, dentro da pasta de armazenamento atual; ambos persistem com Google Drive habilitado. Os starters existentes não são sobrescritos.
+
+As abas Axo Studio e Axo Guide, ADetailer e os complementos de pose continuam exclusivos do Forge nesta versão. Os workflows básicos do ComfyUI não precisam desses complementos. A inferência nesta nova opção ainda precisa de validação em uma sessão Colab com GPU.
+
 O uso principal por uma WebUI é restrito em ambientes gratuitos do Colab sem saldo positivo de unidades de computação. Confira os requisitos atuais de execução na [FAQ oficial do Colab](https://research.google.com/colaboratory/faq.html). GPU e duração da sessão variam conforme disponibilidade e plano.
 
-1. Clique em [**Abrir no Colab**](https://colab.research.google.com/github/Pedroltz/AxoImageStudio/blob/main/Axo_Image_Studio.ipynb).
+1. Clique em [**Abrir no Colab**](https://colab.research.google.com/github/Pedroltz/AxoImageStudio/blob/main/Axo_Image_Studio.ipynb#scrollTo=axo-install-launch) para abrir diretamente a célula com o dropdown de interface.
 2. Salve uma cópia no seu Drive se quiser guardar as alterações do notebook.
 3. Selecione **Ambiente de execução → Alterar tipo de ambiente de execução → GPU**.
-4. Na célula **Install and launch**, escolha o idioma, o modelo inicial e a opção de Google Drive.
-5. Execute a célula e abra o endereço `gradio.live` exibido ao final da inicialização. Mantenha a célula em execução durante o uso.
+4. Na célula **Install and launch**, escolha a interface, o idioma, o modelo inicial e a opção de Google Drive.
+5. Execute a célula e abra o endereço `gradio.live` (Forge) ou `trycloudflare.com` (ComfyUI) exibido ao final da inicialização. Mantenha a célula em execução durante o uso.
 6. Confira o **UI Preset**, o checkpoint e os módulos do modelo. Abra **Axo Guide** para um primeiro teste e **Axo Studio** para explorar as imagens.
 
 O notebook é independente: os arquivos da extensão já estão incluídos nele. Não é necessário enviar a pasta do repositório ao Colab.

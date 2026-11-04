@@ -23,3 +23,4 @@ jobs:
         env:
           GRADIO_ANALYTICS_ENABLED: 'False'
       - run: node tests/test_refresh.cjs
+      - run: node tests/test_comfy_starter.cjs

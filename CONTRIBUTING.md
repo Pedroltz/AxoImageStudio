@@ -46,11 +46,14 @@ O primeiro comando incorpora os arquivos da extensão e a fonte do instalador. O
 ```bash
 GRADIO_ANALYTICS_ENABLED=False python -m pytest -q
 node tests/test_refresh.cjs
+node tests/test_comfy_starter.cjs
 ```
 
 As verificações cobrem comportamentos da galeria e da wiki, incluindo a regressão de prévias quando um hook de cache PIL tenta usar uma pasta temporária inexistente. Os módulos de inferência do Forge são simulados nos testes locais; isso não substitui uma sessão real com GPU.
 
 Para uma mudança no instalador ou nos modelos, valide também no Colab: inicialização, seleção de módulos, uma geração pequena, visualização, download e persistência no Drive quando habilitada.
+
+O backend ComfyUI e os starters são mantidos em `comfy_backend/` e incorporados pelo mesmo gerador. `tests/test_comfy.py` simula instalação, roteamento, configuração, downloads e falhas de processos; o teste JavaScript verifica que o starter preserva grafos existentes. A validação GPU deve cobrir Anima e SDXL nas duas interfaces, reinício, interrupção e persistência no Drive.
 
 ## Enviar uma alteração
 

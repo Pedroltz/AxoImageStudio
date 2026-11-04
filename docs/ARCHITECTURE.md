@@ -2,6 +2,8 @@
 
 O notebook prepara uma sessão do Google Colab. O Forge fornece a geração e edição de imagens; a extensão Axo adiciona a galeria, a wiki e a personalização da interface.
 
+O dropdown `INTERFACE` também pode iniciar o ComfyUI. Essa opção usa checkout em `/content/axo-comfyui`, runtime separado em `/content/axo-comfy-runtime-py312` e túnel Cloudflare temporário. `comfy_backend/` contém o backend, os workflows SDXL/Anima e a extensão que oferece o starter em um editor vazio; o gerador incorpora esses arquivos no notebook. Os modelos são compartilhados por `extra_model_paths.yaml`, separando checkpoints SDXL e diffusion models Anima. As saídas ficam em `outputs/ComfyUI`, e workflows/configurações em `comfy-user` sob a raiz atual. O encerramento limpa servidor e túnel. As extensões do Forge não são carregadas no ComfyUI.
+
 ```mermaid
 flowchart TD
     Notebook[Notebook Colab] --> Launcher[Instalador Axo]

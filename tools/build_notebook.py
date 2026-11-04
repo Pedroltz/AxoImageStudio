@@ -26,12 +26,19 @@ def build():
     lines[assignment.lineno - 1:assignment.end_lineno] = [
         'AXO_EXTENSION_FILES = ' + repr(files) + '\n'
     ]
+    comfy_files = {p.name: p.read_text(encoding='utf-8')
+                   for p in sorted((ROOT / 'comfy_backend').iterdir())
+                   if p.is_file() and p.suffix in {'.py', '.js', '.json'}}
+    embedded = ''.join(lines).replace(
+        'AXO_COMFY_FILES = None  # Embedded by tools/build_notebook.py',
+        'AXO_COMFY_FILES = ' + repr(comfy_files))
     launch_cells = [cell for cell in notebook['cells']
                     if cell['cell_type'] == 'code'
                     and 'AXO_EXTENSION_FILES' in ''.join(cell['source'])]
     if len(launch_cells) != 1:
         raise ValueError('Expected one installation cell in the notebook.')
-    launch_cells[0]['source'] = ''.join(lines).splitlines(keepends=True)
+    launch_cells[0]['source'] = embedded.splitlines(keepends=True)
+    launch_cells[0].setdefault('metadata', {})['id'] = 'axo-install-launch'
     for cell in notebook['cells']:
         if cell['cell_type'] == 'code':
             cell['outputs'] = []
