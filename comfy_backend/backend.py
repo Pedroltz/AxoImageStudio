@@ -1,6 +1,16 @@
 """Colab ComfyUI backend; embedded and executed in the launcher's namespace."""
 COMFY = Path('/content/axo-comfyui')
 COMFY_REVISION = '5f415e31abfd837870bbc733ba1e158de71ed985'
+CIVICOMFY_REVISION = '555e984bbcb02fc955075cb8eb699a6884c51239'
+
+
+def prepare_civicomfy():
+    folder = COMFY / 'custom_nodes/Civicomfy'
+    clone_at('https://github.com/MoonGoblinDev/Civicomfy.git', folder, CIVICOMFY_REVISION)
+    # This revision uses requests/aiohttp already supplied by ComfyUI.
+    for relative in ('__init__.py', 'web/js/civitaiDownloader.js', 'web/js/civitaiDownloader.css'):
+        if not (folder / relative).is_file():
+            raise RuntimeError('Incomplete Civicomfy installation: ' + relative)
 
 
 def prepare_comfy():
@@ -9,6 +19,7 @@ def prepare_comfy():
     run([PYTHON, '-m', 'pip', 'install', 'torch==2.8.0', 'torchvision==0.23.0',
          'torchaudio==2.8.0', '--index-url', 'https://download.pytorch.org/whl/cu126'])
     run([PYTHON, '-m', 'pip', 'install', '-r', COMFY / 'requirements.txt'])
+    prepare_civicomfy()
     run([PYTHON, '-m', 'pip', 'check'])
     run([PYTHON, '-c', 'import torch; assert torch.cuda.is_available(), "CUDA unavailable"'])
     binary = Path('/content/axo-tools/cloudflared')
@@ -24,12 +35,25 @@ def prepare_comfy():
 
 
 def configure_comfy():
-    # Keep Anima out of the checkpoint loader and SDXL out of the UNET loader.
-    mapping = {'base_path': str(MODELS), 'checkpoints': 'Stable-diffusion/SDXL',
+    # Default download locations are the same persistent folders used by Forge.
+    mapping = {'base_path': str(MODELS), 'is_default': True, 'checkpoints': 'Stable-diffusion/SDXL',
                'diffusion_models': 'Stable-diffusion/Anima', 'text_encoders': 'text_encoder',
-               'vae': 'VAE', 'loras': 'Lora', 'upscale_models': 'ESRGAN'}
+               'vae': 'VAE', 'loras': 'Lora', 'upscale_models': 'ESRGAN',
+               'controlnet': 'ControlNet', 'embeddings': 'embeddings'}
+    # Search all Forge checkpoint subfolders plus common Comfy/A1111 aliases.
+    # Keep the original SDXL/Anima roots, so existing starter filenames still work.
+    additional = {'base_path': str(MODELS), 'checkpoints': 'Stable-diffusion\ncheckpoints',
+                  'diffusion_models': 'diffusion_models\nunet',
+                  'text_encoders': 'text_encoders\nclip', 'loras': 'loras\nLyCORIS',
+                  'vae': 'vae', 'upscale_models': 'upscale_models\nRealESRGAN\nSwinIR',
+                  'controlnet': 'controlnet'}
+    for key, value in mapping.items():
+        if key not in ('base_path', 'is_default'):
+            (MODELS / value).mkdir(parents=True, exist_ok=True)
     # JSON is valid YAML; quoting Drive paths this way also handles spaces safely.
-    (COMFY / 'extra_model_paths.yaml').write_text(json.dumps({'axo': mapping}), encoding='utf-8')
+    (COMFY / 'extra_model_paths.yaml').write_text(
+        json.dumps({'axo_additional': additional, 'axo': mapping}), encoding='utf-8')
+    print(f'Shared model folder: {MODELS}. Civicomfy downloads use these folders by default.', flush=True)
     user = ROOT / 'comfy-user'
     workflows = user / 'default/workflows'
     workflows.mkdir(parents=True, exist_ok=True)
@@ -98,6 +122,10 @@ def wait_comfy(server):
                 required = {'UNETLoader', 'CLIPLoader', 'VAELoader', 'CheckpointLoaderSimple', 'KSampler'}
                 if not required.issubset(nodes):
                     raise RuntimeError('Required ComfyUI nodes missing. Inspect comfy.log.')
+                status = requests.get('http://127.0.0.1:8188/civitai/status', timeout=10)
+                if not status.ok or not isinstance(status.json(), dict):
+                    raise RuntimeError('Civicomfy failed to load. Inspect comfy.log and rerun installation.')
+                print('Civicomfy loaded. Open the Civicomfy button to search/download models.', flush=True)
                 return
         except requests.RequestException:
             pass

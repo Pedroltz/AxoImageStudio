@@ -53,6 +53,8 @@ def child_environment(overrides=None):
     env = os.environ.copy()
     if INTERFACE == 'ComfyUI':
         env.pop('PIP_CONSTRAINT', None)
+        if CIVITAI_TOKEN:
+            env['CIVITAI_API_KEY'] = CIVITAI_TOKEN
     if overrides:
         env.update(overrides)
     env.update(MPLBACKEND='Agg', PYTHONUNBUFFERED='1',

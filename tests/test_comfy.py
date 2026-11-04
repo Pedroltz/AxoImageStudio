@@ -32,6 +32,7 @@ def test_paths_workflows_and_user_edits(launcher, capsys):
     config = json.loads((ns['COMFY'] / 'extra_model_paths.yaml').read_text())['axo']
     assert config['checkpoints'] == 'Stable-diffusion/SDXL'
     assert config['diffusion_models'] == 'Stable-diffusion/Anima'
+    assert config['is_default'] is True
     assert 'missing files' in capsys.readouterr().out
     workflows = ns['ROOT'] / 'comfy-user/default/workflows'
     assert len(list(workflows.glob('*.json'))) == 2
@@ -40,6 +41,65 @@ def test_paths_workflows_and_user_edits(launcher, capsys):
     ns['configure_comfy']()
     assert json.loads(edited.read_text()) == {'edited': True}
     assert (ns['AXO_OUTPUT_ROOT'] / 'ComfyUI').is_dir()
+
+
+def test_shared_drive_roots_include_legacy_and_comfy_folders(launcher):
+    ns = launcher
+    ns['MODELS'] = ns['ROOT'] / 'MyDrive/Axo-Image-Studio-Forge/models'
+    legacy = ns['MODELS'] / 'Stable-diffusion/Custom/my-model.safetensors'
+    legacy.parent.mkdir(parents=True)
+    legacy.write_bytes(b'existing model')
+    ns['configure_comfy']()
+    paths = json.loads((ns['COMFY'] / 'extra_model_paths.yaml').read_text())
+    assert paths['axo']['base_path'] == str(ns['MODELS'])
+    assert 'Stable-diffusion' in paths['axo_additional']['checkpoints'].splitlines()
+    assert 'diffusion_models' in paths['axo_additional']['diffusion_models'].splitlines()
+    assert 'text_encoders' in paths['axo_additional']['text_encoders'].splitlines()
+    assert 'LyCORIS' in paths['axo_additional']['loras'].splitlines()
+    assert legacy.read_bytes() == b'existing model'
+    for key, value in paths['axo'].items():
+        if key not in ('base_path', 'is_default'):
+            assert (ns['MODELS'] / value).is_dir()
+
+
+def test_civicomfy_installs_pinned_revision_and_checks_frontend(launcher):
+    ns = launcher
+    ns['clone_at'] = Mock()
+    with pytest.raises(RuntimeError, match='Incomplete Civicomfy'):
+        ns['prepare_civicomfy']()
+    folder = ns['COMFY'] / 'custom_nodes/Civicomfy'
+    for relative in ('__init__.py', 'web/js/civitaiDownloader.js', 'web/js/civitaiDownloader.css'):
+        path = folder / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text('fixture')
+    ns['prepare_civicomfy']()
+    assert ns['clone_at'].call_args.args == (
+        'https://github.com/MoonGoblinDev/Civicomfy.git', folder, ns['CIVICOMFY_REVISION'])
+
+
+def test_civitai_secret_only_passed_to_comfy_child(launcher, monkeypatch):
+    monkeypatch.delenv('CIVITAI_API_KEY', raising=False)
+    ns = launcher
+    ns['CIVITAI_TOKEN'] = 'test-secret-not-real'
+    assert ns['child_environment']()['CIVITAI_API_KEY'] == 'test-secret-not-real'
+    ns['INTERFACE'] = 'Forge Neo'
+    assert 'CIVITAI_API_KEY' not in ns['child_environment']()
+
+
+@pytest.mark.parametrize('loaded', [False, True])
+def test_ready_checks_civicomfy_backend(launcher, loaded):
+    ns = launcher
+    nodes = dict.fromkeys(('UNETLoader', 'CLIPLoader', 'VAELoader', 'CheckpointLoaderSimple', 'KSampler'))
+    ns['requests'] = SimpleNamespace(RequestException=OSError, get=Mock(side_effect=[
+        SimpleNamespace(ok=True, json=lambda: nodes),
+        SimpleNamespace(ok=loaded, json=lambda: {'downloads': []}),
+    ]))
+    server = SimpleNamespace(poll=lambda: None)
+    if loaded:
+        ns['wait_comfy'](server)
+    else:
+        with pytest.raises(RuntimeError, match='Civicomfy failed to load'):
+            ns['wait_comfy'](server)
 
 
 def test_workflow_links_and_model_loaders(launcher):

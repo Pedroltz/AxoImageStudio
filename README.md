@@ -52,6 +52,12 @@ No ComfyUI, abra o link `trycloudflare.com` exibido no fim da inicialização. O
 
 O ComfyUI usa um ambiente Python separado e reaproveita os pesos existentes. Downloads desativados continuam desativados: o notebook informa os arquivos ausentes. As imagens são salvas em `outputs/ComfyUI` e os workflows em `comfy-user`, dentro da pasta de armazenamento atual; ambos persistem com Google Drive habilitado. Os starters existentes não são sobrescritos.
 
+**Civitai dentro do ComfyUI:** o notebook instala o [Civicomfy](https://github.com/MoonGoblinDev/Civicomfy). Abra o botão **Civicomfy** no menu superior para pesquisar modelos ou informar o link de um modelo, escolher a versão e baixar. Se precisar de autenticação, crie o segredo `CIVITAI_TOKEN` no Colab e permita seu uso pelo notebook; ele é passado ao servidor sem ser gravado no notebook.
+
+**Modelos do Drive:** ative `USE_GOOGLE_DRIVE = True` para reutilizar `MyDrive/Axo-Image-Studio-Forge/models`, a mesma pasta do Forge Neo. Checkpoints em `Stable-diffusion` (incluindo subpastas), Anima em `Stable-diffusion/Anima`, LoRAs em `Lora`, VAEs em `VAE` e encoders em `text_encoder` ficam acessíveis. Também são reconhecidas pastas como `checkpoints`, `diffusion_models`, `loras` e `text_encoders` dentro dessa raiz. Arquivos guardados em outras pastas do Drive precisam ser adicionados a essa estrutura.
+
+Os downloads do Civicomfy usam essas pastas por padrão; deixe **Global Download Root** vazio para manter esse comportamento. Para modelos Anima, escolha o tipo/destino **diffusion_models** e use **Load Diffusion Model** no workflow. Checkpoints SDXL usam **checkpoints** e **Load Checkpoint**. LoRAs precisam corresponder à família do modelo. Para aplicar esta atualização a uma sessão existente, reabra o notebook da `main` e execute **Install and launch** novamente; apenas **Restart** não instala a extensão.
+
 As abas Axo Studio e Axo Guide, ADetailer e os complementos de pose continuam exclusivos do Forge nesta versão. Os workflows básicos do ComfyUI não precisam desses complementos. A inferência nesta nova opção ainda precisa de validação em uma sessão Colab com GPU.
 
 O uso principal por uma WebUI é restrito em ambientes gratuitos do Colab sem saldo positivo de unidades de computação. Confira os requisitos atuais de execução na [FAQ oficial do Colab](https://research.google.com/colaboratory/faq.html). GPU e duração da sessão variam conforme disponibilidade e plano.
