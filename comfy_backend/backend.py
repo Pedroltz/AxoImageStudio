@@ -21,13 +21,10 @@ def prepare_character_workspace():
     exec(compile(AXO_COMFY_FILES['character_setup.py'], 'character_setup.py', 'exec'), setup)
     setup.update(COMFY_DIR=COMFY, COMFY_PYTHON=PYTHON)
     setup['main'](standalone=False)
-    destination = ROOT / 'comfy-user/default/workflows/Axo Anima Personagem e Refino v3.json'
+    destination = ROOT / 'comfy-user/default/workflows/Axo Anima Workspace Neutro v4.json'
     if not destination.exists():
         destination.write_text(AXO_COMFY_FILES['character.json'], encoding='utf-8')
-    kaenuco = ROOT / 'comfy-user/default/workflows/Axo Anima Kaenuco Style Hires.json'
-    if not kaenuco.exists():
-        kaenuco.write_text(AXO_COMFY_FILES['kaenuco.json'], encoding='utf-8')
-    print('Open Workflows → Axo Anima Personagem e Refino v3 or Axo Anima Kaenuco Style Hires. Hires, image reference and LoRA slots are optional.', flush=True)
+    print('Open Workflows → Axo Anima Workspace Neutro v4. Prompts are blank; Hires, image reference and LoRA slots are optional.', flush=True)
 
 
 def prepare_comfy():
@@ -139,7 +136,8 @@ def wait_comfy(server):
                 required = {'UNETLoader', 'CLIPLoader', 'VAELoader', 'CheckpointLoaderSimple', 'KSampler'}
                 if ENABLE_CHARACTER_WORKFLOW:
                     character_nodes = {'FaceDetailer', 'UltralyticsDetectorProvider', 'AnimaRefAdapter',
-                                       'AxoAnimaLoraStack', 'AxoOptionalAnimaReference', 'AxoOptionalHires'}
+                                       'AxoAnimaLoraStack', 'AxoOptionalAnimaReference', 'AxoOptionalHires',
+                                       'SEGSOrderedFilterDetailerHookProvider'}
                     missing = character_nodes - nodes.keys()
                     if missing:
                         raise RuntimeError('Character workflow nodes failed to load: ' + ', '.join(sorted(missing))

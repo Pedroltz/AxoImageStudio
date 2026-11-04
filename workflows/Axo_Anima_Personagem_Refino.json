@@ -1,6 +1,6 @@
 {
-  "last_node_id": 23,
-  "last_link_id": 35,
+  "last_node_id": 27,
+  "last_link_id": 39,
   "nodes": [
     {
       "id": 1,
@@ -203,15 +203,15 @@
       "widgets_values": [
         false,
         "Nenhuma",
-        4.5,
-        0.65,
+        1.5,
+        0.5,
         1.0
       ]
     },
     {
       "id": 6,
       "type": "CLIPTextEncode",
-      "title": "06 · EDITE: nova pose, cena e enquadramento",
+      "title": "06 · Prompt positivo · preencha livremente",
       "pos": [
         880,
         80
@@ -245,13 +245,13 @@
         "Node name for S&R": "CLIPTextEncode"
       },
       "widgets_values": [
-        "masterpiece, best quality, score_7, safe, 1girl, solo, full body, standing in a flower garden, relaxed pose, open hands, looking at viewer, soft daylight, detailed background"
+        ""
       ]
     },
     {
       "id": 7,
       "type": "CLIPTextEncode",
-      "title": "07 · Negativo: qualidade e anatomia",
+      "title": "07 · Prompt negativo · opcional",
       "pos": [
         880,
         410
@@ -287,7 +287,7 @@
         "Node name for S&R": "CLIPTextEncode"
       },
       "widgets_values": [
-        "worst quality, low quality, score_1, score_2, score_3, blurry, jpeg artifacts, artist name, text, watermark, bad anatomy, malformed hands, extra fingers, fused fingers, missing fingers, extra limbs, disconnected limbs, duplicate body"
+        ""
       ]
     },
     {
@@ -377,9 +377,9 @@
       },
       "widgets_values": [
         20261104,
-        "randomize",
+        "fixed",
         30,
-        4.5,
+        4.0,
         "euler",
         "simple",
         1.0
@@ -470,7 +470,7 @@
     {
       "id": 12,
       "type": "CLIPTextEncode",
-      "title": "11 · MÃOS · prompt local editável",
+      "title": "11 · Prompt local das mãos · opcional",
       "pos": [
         2260,
         310
@@ -503,13 +503,13 @@
         "Node name for S&R": "CLIPTextEncode"
       },
       "widgets_values": [
-        "masterpiece, best quality, detailed hand, anatomically correct hand, natural fingers, coherent finger joints, matching skin tone, consistent illustration style"
+        ""
       ]
     },
     {
       "id": 13,
       "type": "FaceDetailer",
-      "title": "11 · MÃOS · refino localizado",
+      "title": "11 · Refinar mãos · denoise 0.28",
       "pos": [
         2660,
         80
@@ -570,7 +570,7 @@
         {
           "name": "detailer_hook",
           "type": "DETAILER_HOOK",
-          "link": null
+          "link": 36
         },
         {
           "name": "scheduler_func_opt",
@@ -590,7 +590,9 @@
         {
           "name": "cropped_refined",
           "type": "IMAGE",
-          "links": [],
+          "links": [
+            37
+          ],
           "slot_index": 1,
           "shape": 6
         },
@@ -634,13 +636,13 @@
         4.0,
         "euler",
         "simple",
-        0.35,
-        12,
+        0.28,
+        16,
         true,
         true,
-        0.35,
-        10,
-        2.5,
+        0.4,
+        8,
+        2.0,
         "center-1",
         0,
         0.93,
@@ -698,7 +700,7 @@
     {
       "id": 15,
       "type": "CLIPTextEncode",
-      "title": "12 · ROSTO · prompt local editável",
+      "title": "12 · Prompt local do rosto · opcional",
       "pos": [
         3110,
         310
@@ -731,13 +733,13 @@
         "Node name for S&R": "CLIPTextEncode"
       },
       "widgets_values": [
-        "masterpiece, best quality, detailed face, coherent eyes, natural expression, matching hair and eye colors, consistent illustration style"
+        ""
       ]
     },
     {
       "id": 16,
       "type": "FaceDetailer",
-      "title": "12 · ROSTO · refino localizado",
+      "title": "12 · Refinar rosto e olhos · denoise 0.24",
       "pos": [
         3510,
         80
@@ -798,7 +800,7 @@
         {
           "name": "detailer_hook",
           "type": "DETAILER_HOOK",
-          "link": null
+          "link": 38
         },
         {
           "name": "scheduler_func_opt",
@@ -818,7 +820,9 @@
         {
           "name": "cropped_refined",
           "type": "IMAGE",
-          "links": [],
+          "links": [
+            39
+          ],
           "slot_index": 1,
           "shape": 6
         },
@@ -853,22 +857,22 @@
         "Node name for S&R": "FaceDetailer"
       },
       "widgets_values": [
-        512,
+        640,
         true,
-        768,
+        1024,
         20261104,
         "fixed",
-        20,
+        24,
         4.0,
         "euler",
         "simple",
-        0.22,
-        12,
+        0.24,
+        16,
         true,
         true,
         0.45,
-        10,
-        2.5,
+        8,
+        1.8,
         "center-1",
         0,
         0.93,
@@ -947,14 +951,14 @@
     {
       "id": 19,
       "type": "MarkdownNote",
-      "title": "LEIA PRIMEIRO · Instalação e modelos",
+      "title": "Axo · Workspace Anima neutro v4",
       "pos": [
         40,
         -850
       ],
       "size": [
         1180,
-        800
+        700
       ],
       "flags": {},
       "order": 18,
@@ -965,20 +969,20 @@
         "Node name for S&R": "MarkdownNote"
       },
       "widgets_values": [
-        "# Axo · Anima v2: prompt, LoRAs e imagem opcional\nWorkflow experimental. Importar o JSON não instala extensões.\n\n## Instale estes 3 pacotes e reinicie o ComfyUI\n- Anima Ref Adapter: https://github.com/ArcAnima/ComfyUI-Anima-Ref-Adapter\n- Impact Pack: https://github.com/ltdrdata/ComfyUI-Impact-Pack\n- Impact Subpack: https://github.com/ltdrdata/ComfyUI-Impact-Subpack\nNo notebook Axo atualizado, selecione INTERFACE=ComfyUI e mantenha ENABLE_CHARACTER_WORKFLOW=True. Execute Install and launch: os pacotes e pesos serão instalados automaticamente e este workflow aparecerá no menu Workflows.\nEm uma instalação independente, use o ComfyUI Manager ou siga as instruções dos repositórios. Se houver nós vermelhos, falta carregar o pacote correspondente: instale-o, reinicie o servidor e recarregue a página.\nOs controles AxoAnimaLoraStack e AxoOptionalAnimaReference fazem parte do notebook Axo atualizado. Reexecute Install and launch para instalá-los. Eles não exigem outro pacote do Manager.\n\n## Pesos\nAnima base v1.0 + qwen_3_06b_base + qwen_image_vae:\nhttps://huggingface.co/circlestone-labs/Anima/tree/main/split_files\nO adaptador baixa anima_ref_adapter_v2_r64.safetensors (~183 MB) no primeiro uso, da fonte:\nhttps://huggingface.co/ElectronGirl/anima-ref-adapter\nSe necessário, baixe manualmente para models/loras.\n\nDetecção: coloque face_yolov8n.pt e hand_yolov8n.pt em ComfyUI/models/ultralytics/bbox/:\nhttps://huggingface.co/Bingsu/adetailer/tree/main\nSe já os tem na pasta adetailer do Drive, COPIE para essa pasta ou registre-a como ultralytics_bbox em extra_model_paths.yaml.\nNão precisa de SAM, IPAdapter SDXL ou pesos de refiner SDXL.\n"
+        "# Axo · Workspace Anima neutro v4\nEste template não contém personagem, tema, gatilhos de estilo nem uma LoRA selecionada. Todos os prompts começam vazios.\nMantenha Anima base v1.0, o encoder Qwen e o Qwen Image VAE corretos nos três loaders. Esses modelos são a base técnica do workflow; use apenas LoRAs compatíveis com Anima.\nO notebook atualizado instala os nós necessários com ENABLE_CHARACTER_WORKFLOW=True. Execute Install and launch para atualizar e abra Workflows → Axo Anima Workspace Neutro v4. Não precisa de Manager.\n"
       ]
     },
     {
       "id": 20,
       "type": "MarkdownNote",
-      "title": "COMO USAR · Referência, pose e cena",
+      "title": "Preencha apenas o que quiser usar",
       "pos": [
         1290,
         -850
       ],
       "size": [
         1180,
-        800
+        700
       ],
       "flags": {},
       "order": 19,
@@ -989,20 +993,20 @@
         "Node name for S&R": "MarkdownNote"
       },
       "widgets_values": [
-        "# Primeiro teste\n1. SEM IMAGEM (padrão): deixe use_reference desligado no nó 05. Não precisa enviar imagem. Descreva aparência, roupa, pose e cena no prompt 06.\n2. Confira os nomes dos três modelos. Em uma instalação padrão são nomes simples; se houver subpastas, selecione a opção correta.\n3. LoRAs OPCIONAIS: no nó 04 selecione até três LoRAs do Anima. Nenhuma desativa o slot; peso 0 também desativa. Comece com 0.6–0.8 e inclua trigger words no prompt quando a LoRA pedir. Os arquivos vêm das pastas Lora/loras/LyCORIS compartilhadas, incluindo o Drive. Não use LoRAs SDXL/Flux. Não selecione o adaptador de referência como LoRA de estilo.\n4. COM IMAGEM: envie e selecione a imagem no nó 05 e ligue use_reference. Então o prompt pode focar na nova pose/cena. Você pode combinar imagem e LoRAs. Clique em Run: a geração começa de ruído e pode mudar a composição.\n5. Compare as saídas ANTES e FINAL. Ambas são salvas, em Axo/Personagem.\n\n## Ajustes\n- Pouca semelhança: referência mais limpa; ref_guidance 4.5 → 5.5; ref_end 0.65 → 1.0. Mais força também pode copiar estilo/composição ou saturar.\n- Para repetir uma composição: mude randomize para fixed no KSampler.\n- VRAM: batch 1. Comece em 832×1216. Se faltar memória, teste 768×1024 e ref_megapixels 0.5.\n- Este adaptador foi projetado para Anima BASE v1.0. Derivados precisam de teste; não substitua o modelo por SDXL/Flux.\n- Este fluxo recebe a pose por TEXTO. Não inclui OpenPose nem uma segunda imagem para controlar a pose.\n"
+        "# Preencha apenas o que quiser usar\n1. Preencha o prompt positivo principal (06) com seu tema, personagem, pose e cena. O negativo (07) é opcional.\n2. Os três slots de LoRA começam em Nenhuma. Escolha uma LoRA e seu peso se quiser; peso 0 também desativa o slot. Acrescente os gatilhos apropriados aos prompts quando o autor recomendar.\n3. A referência começa desligada e sem imagem selecionada. Se quiser usar uma personagem como base, envie/selecione a imagem no nó 05 e ligue use_reference. Uma referência com fundo limpo ajuda a reduzir transferência de elementos indesejados.\n4. Os prompts locais de mãos e rosto também começam vazios. Eles são independentes do prompt principal: preencha-os se quiser orientar esses refinamentos ou adicionar gatilhos da LoRA. Sem texto local, o refino se apoia na imagem e no modelo com denoise baixo.\n5. Execute e compare ANTES e FINAL. A seed principal começa fixa para facilitar testes; mude para randomize se quiser variações.\n"
       ]
     },
     {
       "id": 21,
       "type": "MarkdownNote",
-      "title": "REFINAMENTO · Limites e recuperação",
+      "title": "Refinamento e inspeção",
       "pos": [
         2990,
         -850
       ],
       "size": [
         1450,
-        800
+        700
       ],
       "flags": {},
       "order": 20,
@@ -1013,13 +1017,13 @@
         "Node name for S&R": "MarkdownNote"
       },
       "widgets_values": [
-        "# Mãos → rosto\nSão dois FaceDetailer: o primeiro usa detector de MÃOS, o segundo de ROSTO. Ambos fazem inpaint localizado com o Anima base; o nome FaceDetailer não limita o detector ao rosto.\n- Mãos: denoise 0.35; rosto: 0.22; 20 steps, CFG 4, Euler/simple, cycle 1. Comece assim.\n- Se mudar a identidade/cores: reduza denoise do rosto para 0.15–0.20 e acrescente traços da personagem no prompt local.\n- Se a mão continuar ruim: tente denoise 0.40–0.45, compare ANTES/FINAL. Valores altos podem piorar a pose.\n- Se nada for detectado, a imagem passa sem refinamento. Detectores podem falhar em anime, mãos escondidas ou muito deformadas. Corrigir esses casos pode exigir máscara manual ou nova seed.\n- Para desligar uma etapa, selecione o FaceDetailer e use Bypass (Ctrl+B). O restante do grafo continua conectado.\n- O refinamento usa Anima + as LoRAs selecionadas, sem a referência visual, para evitar trazer o corpo inteiro para um recorte do rosto/mão. A identidade depende da imagem gerada e de denoise baixo. Repita trigger words relevantes nos prompts locais se necessário.\n\nReduz deformações; NÃO garante anatomia perfeita nem identidade idêntica. Não consegue reconstruir com certeza dedos ocultos ou remover todos os membros extras. Este JSON foi validado estruturalmente contra as definições dos nós; geração com GPU ainda não testada aqui.\n\n## Fontes das interfaces\nAnima Ref Adapter: 99c222e1c2da472f4b514583b2dbd1b5afb4bdd9\nImpact Pack: eace4a9059908330936c6514f35f5e0c84935394\nAs fontes acima documentam os nós, parâmetros e limitações. Mantenha ComfyUI e extensões compatíveis/atualizados.\n"
+        "# Refinamento e inspeção\nMãos: denoise 0.28, máximo de dois maiores recortes. Rosto: denoise 0.24, guide_size 640, crop_factor 1.8 e apenas o maior recorte.\nOs filtros podem reduzir falsos positivos em estampas ou rostos pequenos no fundo, mas não reconhecem semanticamente quem é a pessoa principal. Veja as prévias das regiões refinadas.\nPara mais personagens, ajuste take_count nos filtros. Se o detector escolher a área errada, não aumente denoise às cegas: use uma máscara manual ou uma base mais limpa.\nSe o rosto mudar demais, teste denoise 0.18–0.20. Para corrigir mais, 0.28–0.30 pode ajudar, mas pode mudar identidade e estilo. Não há garantia de eliminar deformações.\nAs LoRAs do nó 04 acompanham a geração e os refinamentos. A referência visual não é aplicada aos pequenos recortes. Para desligar um FaceDetailer, use Bypass (Ctrl+B).\n"
       ]
     },
     {
       "id": 22,
       "type": "AxoOptionalHires",
-      "title": "HIRES OPCIONAL · desligado · escala, denoise e steps",
+      "title": "HIRES OPCIONAL · 1.25× · sem redesenho por padrão",
       "pos": [
         1810,
         80
@@ -1073,22 +1077,22 @@
       },
       "widgets_values": [
         false,
-        1.5,
-        0.2,
-        16,
-        4.0,
+        1.25,
+        0.0,
+        24,
+        3.5,
         20261104,
         "fixed",
         "euler",
         "simple",
         "bicubic",
-        true
+        false
       ]
     },
     {
       "id": 23,
       "type": "MarkdownNote",
-      "title": "HIRES · Como configurar e economizar memória",
+      "title": "Hires opcional, conservador",
       "pos": [
         1810,
         1250
@@ -1106,8 +1110,136 @@
         "Node name for S&R": "MarkdownNote"
       },
       "widgets_values": [
-        "## Hires / Upscale opcional\nO Hires começa DESLIGADO. Ative enabled no nó HIRES OPCIONAL para aumentar a resolução antes do refino de mãos e rosto.\nPonto de partida: escala 1.5×, denoise 0.20, 16 steps, CFG 4, Euler/simple. 832×1216 passa para 1248×1824. Tamanho arredondado à grade de 16 pixels.\nDesligado: a imagem passa intacta, sem upscale, encode/decode nem amostragem adicional. Denoise 0 com Hires ligado faz apenas o redimensionamento bicubic/lanczos.\nDenoise maior redesenha mais a imagem e pode mudar rosto, estilo e mãos; comece em 0.15–0.25. Escala 2× exige bem mais VRAM e tempo. Para pouca memória, prefira 1.25× ou deixe desligado.\ntiled_vae reduz memória só no encode/decode VAE, não divide o sampler em blocos. Não garante que a GPU consiga processar qualquer resolução. O mesmo modelo com LoRAs, prompt e referência opcional alimenta o Hires.\nPara repetir o Hires, mantenha sua seed em fixed. Antes é salvo na resolução base; Final inclui Hires (se ligado) e refinamentos.\nEste nó Axo exige o notebook atualizado: reabra o link novo e execute Install and launch; só importar o JSON na versão anterior deixará o nó ausente.\n"
+        "# Hires opcional, conservador\nO Hires começa desligado. Ao ligar, o padrão é 1.25× e denoise 0: apenas redimensiona, sem sampler nem encode/decode VAE no Hires. 832×1216 passa para 1040×1520. Isso não remove ruído da base nem inventa detalhes.\nDepois de obter uma base boa, pode testar denoise 0.10, 24 steps e CFG 3.5 para uma passagem suave do Anima. Escala e todos os parâmetros continuam configuráveis.\ntiled_vae começa desligado. Ligue se precisar economizar memória no VAE; isso não divide o sampler em blocos. Se faltar VRAM, reduza a escala, volte a denoise 0 ou desligue Hires.\nO arquivo ANTES é salvo na resolução base; FINAL inclui Hires se ligado e os refinamentos de mãos/rosto. Mudanças nos prompts também podem criar ruído ou elementos repetidos; confira o texto antes de aumentar resolução/denoise.\nEstrutura e parâmetros validados sem geração com GPU. Não é uma garantia de resultado visual.\n"
       ]
+    },
+    {
+      "id": 24,
+      "type": "SEGSOrderedFilterDetailerHookProvider",
+      "title": "Filtrar detecção: 2 maior(es) recorte(s)",
+      "pos": [
+        2260,
+        650
+      ],
+      "size": [
+        340,
+        190
+      ],
+      "flags": {},
+      "order": 23,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "DETAILER_HOOK",
+          "type": "DETAILER_HOOK",
+          "links": [
+            36
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SEGSOrderedFilterDetailerHookProvider"
+      },
+      "widgets_values": [
+        "area(=w*h)",
+        true,
+        0,
+        2
+      ]
+    },
+    {
+      "id": 25,
+      "type": "PreviewImage",
+      "title": "Inspeção: regiões de mãos",
+      "pos": [
+        3140,
+        1220
+      ],
+      "size": [
+        440,
+        450
+      ],
+      "flags": {},
+      "order": 24,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 37
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 26,
+      "type": "SEGSOrderedFilterDetailerHookProvider",
+      "title": "Filtrar detecção: 1 maior(es) recorte(s)",
+      "pos": [
+        3110,
+        650
+      ],
+      "size": [
+        340,
+        190
+      ],
+      "flags": {},
+      "order": 25,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "DETAILER_HOOK",
+          "type": "DETAILER_HOOK",
+          "links": [
+            38
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SEGSOrderedFilterDetailerHookProvider"
+      },
+      "widgets_values": [
+        "area(=w*h)",
+        true,
+        0,
+        1
+      ]
+    },
+    {
+      "id": 27,
+      "type": "PreviewImage",
+      "title": "Inspeção: regiões de rosto",
+      "pos": [
+        3650,
+        1220
+      ],
+      "size": [
+        440,
+        450
+      ],
+      "flags": {},
+      "order": 26,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 39
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": []
     }
   ],
   "links": [
@@ -1382,6 +1514,38 @@
       13,
       0,
       "IMAGE"
+    ],
+    [
+      36,
+      24,
+      0,
+      13,
+      9,
+      "DETAILER_HOOK"
+    ],
+    [
+      37,
+      13,
+      1,
+      25,
+      0,
+      "IMAGE"
+    ],
+    [
+      38,
+      26,
+      0,
+      16,
+      9,
+      "DETAILER_HOOK"
+    ],
+    [
+      39,
+      16,
+      1,
+      27,
+      0,
+      "IMAGE"
     ]
   ],
   "groups": [
@@ -1468,17 +1632,13 @@
   "version": 0.4,
   "extra": {
     "ds": {
-      "scale": 0.42,
+      "scale": 0.38,
       "offset": [
-        20,
+        40,
         900
       ]
     },
-    "axo_workflow": "Anima optional reference + 3 optional LoRAs + hands + face / experimental v2 / optional Hires",
-    "requires": [
-      "ComfyUI-Anima-Ref-Adapter",
-      "ComfyUI-Impact-Pack",
-      "ComfyUI-Impact-Subpack"
-    ]
+    "axo_workflow": "Anima neutral workspace v4 / optional reference, LoRAs and Hires / hands and face refinement",
+    "preset_tested_with_gpu": false
   }
 }

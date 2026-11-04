@@ -29,18 +29,35 @@ def test_reference_workflow_connections_and_refinement_order(filename, prefix):
     sampler = next(n for n in nodes.values() if n['type'] == 'KSampler')
     assert sampler['inputs'][0]['link'] in adapter['outputs'][0]['links']
     hires = next(n for n in nodes.values() if n['type'] == 'AxoOptionalHires')
-    assert hires['widgets_values'][:3] == [False,1.5,0.2]
+    defaults = [False,1.5,0.2] if 'Kaenuco' in filename else [False,1.25,0.0]
+    assert hires['widgets_values'][:3] == defaults
     assert hires['inputs'][1]['link'] in adapter['outputs'][0]['links']
     latent = next(n for n in nodes.values() if n['type'] == 'EmptyLatentImage')
     assert sampler['inputs'][3]['link'] in latent['outputs'][0]['links']
-    hands = next(n for n in nodes.values() if n['type'] == 'FaceDetailer' and 'MÃOS' in n['title'])
-    face = next(n for n in nodes.values() if n['type'] == 'FaceDetailer' and 'ROSTO' in n['title'])
+    hands = next(n for n in nodes.values() if n['type'] == 'FaceDetailer' and 'mãos' in n['title'].lower())
+    face = next(n for n in nodes.values() if n['type'] == 'FaceDetailer' and 'rosto' in n['title'].lower())
     assert hands['inputs'][0]['link'] in hires['outputs'][0]['links']
     assert face['inputs'][0]['link'] in hands['outputs'][0]['links']
     assert hands['inputs'][1]['link'] in loras['outputs'][0]['links']
     assert face['inputs'][1]['link'] in loras['outputs'][0]['links']
     final = next(n for n in nodes.values() if n['type'] == 'SaveImage' and n['widgets_values'] == [prefix + '/final'])
     assert final['inputs'][0]['link'] in face['outputs'][0]['links']
+
+
+def test_neutral_workspace_has_no_subject_style_or_reference_selection():
+    source = (ROOT / 'workflows/Axo_Anima_Personagem_Refino.json').read_text(encoding='utf-8')
+    graph = json.loads(source)
+    for node in graph['nodes']:
+        if node['type'] == 'CLIPTextEncode':
+            assert node['widgets_values'] == ['']
+        elif node['type'] == 'AxoAnimaLoraStack':
+            assert node['widgets_values'][::2] == ['Nenhuma'] * 3
+        elif node['type'] == 'AxoOptionalAnimaReference':
+            assert node['widgets_values'][:2] == [False,'Nenhuma']
+    assert all(term not in source.lower() for term in ('kaenuco','krekkov','1000078911','punk girl','215370783229823'))
+    filters = [node for node in graph['nodes'] if node['type']=='SEGSOrderedFilterDetailerHookProvider']
+    assert sorted(node['widgets_values'][-1] for node in filters) == [1,2]
+    assert len([node for node in graph['nodes'] if node['type']=='PreviewImage']) == 2
 
 
 def test_installer_preserves_paths_and_targets_comfy_runtime(tmp_path, monkeypatch):
