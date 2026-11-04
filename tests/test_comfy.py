@@ -19,6 +19,8 @@ def launcher(tmp_path):
     exec(compile(tree, 'axo_launcher.py', 'exec'), ns)
     ns['AXO_COMFY_FILES'] = {p.name: p.read_text(encoding='utf-8')
                               for p in (ROOT / 'comfy_backend').iterdir() if p.is_file()}
+    ns['AXO_COMFY_FILES']['character_setup.py'] = (ROOT / 'workflows/Instalar_Dependencias_Personagem.py').read_text(encoding='utf-8')
+    ns['AXO_COMFY_FILES']['character.json'] = (ROOT / 'workflows/Axo_Anima_Personagem_Refino.json').read_text(encoding='utf-8')
     exec(compile(ns['AXO_COMFY_FILES']['backend.py'], 'backend.py', 'exec'), ns)
     ns.update(ROOT=tmp_path, MODELS=tmp_path / 'models', AXO_OUTPUT_ROOT=tmp_path / 'outputs',
               COMFY=tmp_path / 'comfy', INTERFACE='ComfyUI')
@@ -89,7 +91,8 @@ def test_civitai_secret_only_passed_to_comfy_child(launcher, monkeypatch):
 @pytest.mark.parametrize('loaded', [False, True])
 def test_ready_checks_civicomfy_backend(launcher, loaded):
     ns = launcher
-    nodes = dict.fromkeys(('UNETLoader', 'CLIPLoader', 'VAELoader', 'CheckpointLoaderSimple', 'KSampler'))
+    nodes = dict.fromkeys(('UNETLoader', 'CLIPLoader', 'VAELoader', 'CheckpointLoaderSimple', 'KSampler',
+                          'FaceDetailer', 'UltralyticsDetectorProvider', 'AnimaRefAdapter'))
     ns['requests'] = SimpleNamespace(RequestException=OSError, get=Mock(side_effect=[
         SimpleNamespace(ok=True, json=lambda: nodes),
         SimpleNamespace(ok=loaded, json=lambda: {'downloads': []}),
@@ -134,6 +137,7 @@ def test_start_routes_to_selected_engine(launcher):
     names = ('stop', 'check_gpu', 'prepare_paths', 'load_download_dependencies', 'read_colab_token',
              'ensure_runtime', 'prepare_comfy', 'download_models', 'configure_comfy', 'launch_comfy',
              'prepare_webui', 'install_dependencies', 'configure_workspace', 'launch_webui')
+    names += ('prepare_character_workspace',)
     for name in names:
         ns[name] = Mock()
     for interface, expected, excluded in [('ComfyUI', 'launch_comfy', 'prepare_webui'),
@@ -193,4 +197,47 @@ def test_notebook_embeds_backend_and_workflows():
     embedded = ast.literal_eval(assignment.value)
     expected = {p.name: p.read_text(encoding='utf-8') for p in (ROOT / 'comfy_backend').iterdir()
                 if p.is_file() and p.suffix in {'.py', '.js', '.json'}}
+    expected['character_setup.py'] = (ROOT / 'workflows/Instalar_Dependencias_Personagem.py').read_text(encoding='utf-8')
+    expected['character.json'] = (ROOT / 'workflows/Axo_Anima_Personagem_Refino.json').read_text(encoding='utf-8')
     assert embedded == expected
+
+
+def test_character_setup_isolated_and_preserves_saved_workflow(launcher):
+    ns = launcher
+    ns['configure_comfy']()
+    original_run = ns['run']
+    ns['AXO_COMFY_FILES']['character_setup.py'] = (
+        'def run(): pass\n'
+        'def main(standalone=True):\n'
+        '    assert standalone is False\n'
+        '    (COMFY_DIR / "character-installed").touch()\n')
+    ns['prepare_character_workspace']()
+    assert ns['run'] is original_run
+    assert (ns['COMFY'] / 'character-installed').is_file()
+    saved = ns['ROOT'] / 'comfy-user/default/workflows/Axo Anima Personagem e Refino.json'
+    graph = json.loads(saved.read_text(encoding='utf-8'))
+    types = {n['type'] for n in graph['nodes']}
+    assert {'FaceDetailer', 'UltralyticsDetectorProvider', 'AnimaRefAdapter'} <= types
+    saved.write_text('{"edited":true}', encoding='utf-8')
+    ns['prepare_character_workspace']()
+    assert json.loads(saved.read_text()) == {'edited': True}
+
+
+def test_missing_character_nodes_fail_before_public_link(launcher):
+    ns = launcher
+    ns['requests'] = SimpleNamespace(RequestException=OSError, get=Mock(return_value=SimpleNamespace(
+        ok=True, json=lambda: dict.fromkeys(('UNETLoader', 'CLIPLoader', 'VAELoader', 'CheckpointLoaderSimple', 'KSampler')))))
+    with pytest.raises(RuntimeError, match='AnimaRefAdapter'):
+        ns['wait_comfy'](SimpleNamespace(poll=lambda: None))
+
+
+def test_disabling_character_workflow_skips_installation(launcher):
+    ns = launcher
+    for name in ('stop', 'check_gpu', 'prepare_paths', 'load_download_dependencies', 'read_colab_token',
+                 'ensure_runtime', 'prepare_comfy', 'download_models', 'configure_comfy', 'launch_comfy',
+                 'prepare_character_workspace'):
+        ns[name] = Mock()
+    ns['ENABLE_CHARACTER_WORKFLOW'] = False
+    ns['start']()
+    ns['prepare_character_workspace'].assert_not_called()
+    ns['launch_comfy'].assert_called_once()

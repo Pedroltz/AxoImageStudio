@@ -3,6 +3,7 @@ INTERFACE = 'Forge Neo' #@param ['Forge Neo', 'ComfyUI']
 LANGUAGE = 'pt-BR' #@param ['en', 'pt-BR']
 START_WITH = 'SDXL' #@param ['SDXL', 'Anima']
 USE_GOOGLE_DRIVE = False #@param {type:'boolean'}
+ENABLE_CHARACTER_WORKFLOW = True #@param {type:'boolean'}
 DOWNLOAD_SDXL_BASE = True #@param {type:'boolean'}
 DOWNLOAD_ANIMA_BASE = True #@param {type:'boolean'}
 DOWNLOAD_CONTROLNET_SDXL = True #@param {type:'boolean'}
@@ -412,6 +413,8 @@ def start():
         prepare_comfy()
         download_models()
         configure_comfy()
+        if ENABLE_CHARACTER_WORKFLOW:
+            prepare_character_workspace()
         launch_comfy()
         return
     print('[2/6] Installing Forge Neo and extensions…', flush=True)

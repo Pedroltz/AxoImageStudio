@@ -55,6 +55,8 @@ Para uma mudança no instalador ou nos modelos, valide também no Colab: inicial
 
 O backend ComfyUI e os starters são mantidos em `comfy_backend/` e incorporados pelo mesmo gerador. `tests/test_comfy.py` simula instalação, roteamento, configuração, downloads e falhas de processos; o teste JavaScript verifica que o starter preserva grafos existentes. A validação GPU deve cobrir Anima e SDXL nas duas interfaces, reinício, interrupção e persistência no Drive.
 
+O gerador incorpora também o workflow de personagem e seu instalador em `workflows/`. O instalador é executado em namespace separado no Python isolado do ComfyUI, preservando os helpers do launcher. `tests/test_character_setup.py` valida destinos de modelos e preservação das configurações sem instalar pacotes ou baixar pesos. O SAM2 é opcional na revisão fixada do Impact Pack e não é instalado, pois esse workflow usa apenas os detectores YOLO e FaceDetailer.
+
 ## Enviar uma alteração
 
 Use uma branch para a mudança, regenere o notebook se necessário e execute as verificações antes de abrir um pull request no [repositório](https://github.com/Pedroltz/AxoImageStudio). O GitHub Actions repete as verificações da interface e do notebook.

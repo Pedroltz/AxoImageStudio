@@ -1,0 +1,1336 @@
+{
+  "last_node_id": 21,
+  "last_link_id": 29,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "UNETLoader",
+      "title": "01 · Modelo Anima BASE v1.0",
+      "pos": [
+        40,
+        80
+      ],
+      "size": [
+        320,
+        180
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            1,
+            14,
+            22
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "UNETLoader"
+      },
+      "widgets_values": [
+        "anima-base-v1.0.safetensors",
+        "default"
+      ]
+    },
+    {
+      "id": 2,
+      "type": "CLIPLoader",
+      "title": "02 · Encoder Qwen do Anima",
+      "pos": [
+        40,
+        290
+      ],
+      "size": [
+        320,
+        180
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            4,
+            5,
+            12,
+            15,
+            20,
+            23
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPLoader"
+      },
+      "widgets_values": [
+        "qwen_3_06b_base.safetensors",
+        "stable_diffusion",
+        "default"
+      ]
+    },
+    {
+      "id": 3,
+      "type": "VAELoader",
+      "title": "03 · Qwen Image VAE",
+      "pos": [
+        40,
+        500
+      ],
+      "size": [
+        320,
+        180
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            2,
+            11,
+            16,
+            24
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAELoader"
+      },
+      "widgets_values": [
+        "qwen_image_vae.safetensors"
+      ]
+    },
+    {
+      "id": 4,
+      "type": "LoadImage",
+      "title": "04 · ENVIE A IMAGEM DA PERSONAGEM",
+      "pos": [
+        420,
+        80
+      ],
+      "size": [
+        360,
+        430
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            3
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "reference.png",
+        "image"
+      ]
+    },
+    {
+      "id": 5,
+      "type": "AnimaRefAdapter",
+      "title": "05 · Identidade e estilo da referência",
+      "pos": [
+        420,
+        560
+      ],
+      "size": [
+        360,
+        290
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 1
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 2
+        },
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            6
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AnimaRefAdapter"
+      },
+      "widgets_values": [
+        "anima_ref_adapter_v2_r64.safetensors",
+        4.5,
+        "apg",
+        1.0,
+        0.65,
+        1.0
+      ]
+    },
+    {
+      "id": 6,
+      "type": "CLIPTextEncode",
+      "title": "06 · EDITE: nova pose, cena e enquadramento",
+      "pos": [
+        880,
+        80
+      ],
+      "size": [
+        430,
+        280
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 4
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            7
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "masterpiece, best quality, score_7, safe, 1girl, solo, full body, standing in a flower garden, relaxed pose, open hands, looking at viewer, soft daylight, detailed background"
+      ]
+    },
+    {
+      "id": 7,
+      "type": "CLIPTextEncode",
+      "title": "07 · Negativo: qualidade e anatomia",
+      "pos": [
+        880,
+        410
+      ],
+      "size": [
+        430,
+        230
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 5
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            8,
+            18,
+            26
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "worst quality, low quality, score_1, score_2, score_3, blurry, jpeg artifacts, artist name, text, watermark, bad anatomy, malformed hands, extra fingers, fused fingers, missing fingers, extra limbs, disconnected limbs, duplicate body"
+      ]
+    },
+    {
+      "id": 8,
+      "type": "EmptyLatentImage",
+      "title": "08 · Formato: 832 × 1216, batch 1",
+      "pos": [
+        880,
+        700
+      ],
+      "size": [
+        320,
+        180
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            9
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "EmptyLatentImage"
+      },
+      "widgets_values": [
+        832,
+        1216,
+        1
+      ]
+    },
+    {
+      "id": 9,
+      "type": "KSampler",
+      "title": "09 · Geração de NOVA imagem (denoise 1)",
+      "pos": [
+        1380,
+        80
+      ],
+      "size": [
+        330,
+        480
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 6
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 7
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 8
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 9
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            10
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "KSampler"
+      },
+      "widgets_values": [
+        20261104,
+        "randomize",
+        30,
+        4.5,
+        "euler",
+        "simple",
+        1.0
+      ]
+    },
+    {
+      "id": 10,
+      "type": "VAEDecode",
+      "title": "10 · Decodificar geração",
+      "pos": [
+        1380,
+        620
+      ],
+      "size": [
+        320,
+        180
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 10
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 11
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            13,
+            28
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 11,
+      "type": "UltralyticsDetectorProvider",
+      "title": "11 · MÃOS · detector",
+      "pos": [
+        1810,
+        80
+      ],
+      "size": [
+        320,
+        180
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "BBOX_DETECTOR",
+          "type": "BBOX_DETECTOR",
+          "links": [
+            19
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "SEGM_DETECTOR",
+          "type": "SEGM_DETECTOR",
+          "links": [],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "UltralyticsDetectorProvider"
+      },
+      "widgets_values": [
+        "bbox/hand_yolov8n.pt"
+      ]
+    },
+    {
+      "id": 12,
+      "type": "CLIPTextEncode",
+      "title": "11 · MÃOS · prompt local editável",
+      "pos": [
+        1810,
+        310
+      ],
+      "size": [
+        340,
+        230
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 12
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            17
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "masterpiece, best quality, detailed hand, anatomically correct hand, natural fingers, coherent finger joints, matching skin tone, consistent illustration style"
+      ]
+    },
+    {
+      "id": 13,
+      "type": "FaceDetailer",
+      "title": "11 · MÃOS · refino localizado",
+      "pos": [
+        2210,
+        80
+      ],
+      "size": [
+        350,
+        1000
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 13
+        },
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 14
+        },
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 15
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 16
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 17
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 18
+        },
+        {
+          "name": "bbox_detector",
+          "type": "BBOX_DETECTOR",
+          "link": 19
+        },
+        {
+          "name": "sam_model_opt",
+          "type": "SAM_MODEL",
+          "link": null
+        },
+        {
+          "name": "segm_detector_opt",
+          "type": "SEGM_DETECTOR",
+          "link": null
+        },
+        {
+          "name": "detailer_hook",
+          "type": "DETAILER_HOOK",
+          "link": null
+        },
+        {
+          "name": "scheduler_func_opt",
+          "type": "SCHEDULER_FUNC",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            21
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "cropped_refined",
+          "type": "IMAGE",
+          "links": [],
+          "slot_index": 1,
+          "shape": 6
+        },
+        {
+          "name": "cropped_enhanced_alpha",
+          "type": "IMAGE",
+          "links": [],
+          "slot_index": 2,
+          "shape": 6
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "links": [],
+          "slot_index": 3
+        },
+        {
+          "name": "detailer_pipe",
+          "type": "DETAILER_PIPE",
+          "links": [],
+          "slot_index": 4
+        },
+        {
+          "name": "cnet_images",
+          "type": "IMAGE",
+          "links": [],
+          "slot_index": 5,
+          "shape": 6
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FaceDetailer"
+      },
+      "widgets_values": [
+        512,
+        true,
+        768,
+        20261104,
+        "fixed",
+        20,
+        4.0,
+        "euler",
+        "simple",
+        0.35,
+        12,
+        true,
+        true,
+        0.35,
+        10,
+        2.5,
+        "center-1",
+        0,
+        0.93,
+        0,
+        0.7,
+        "False",
+        10,
+        "",
+        1,
+        false,
+        20,
+        false,
+        false
+      ]
+    },
+    {
+      "id": 14,
+      "type": "UltralyticsDetectorProvider",
+      "title": "12 · ROSTO · detector",
+      "pos": [
+        2660,
+        80
+      ],
+      "size": [
+        320,
+        180
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "BBOX_DETECTOR",
+          "type": "BBOX_DETECTOR",
+          "links": [
+            27
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "SEGM_DETECTOR",
+          "type": "SEGM_DETECTOR",
+          "links": [],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "UltralyticsDetectorProvider"
+      },
+      "widgets_values": [
+        "bbox/face_yolov8n.pt"
+      ]
+    },
+    {
+      "id": 15,
+      "type": "CLIPTextEncode",
+      "title": "12 · ROSTO · prompt local editável",
+      "pos": [
+        2660,
+        310
+      ],
+      "size": [
+        340,
+        230
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 20
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            25
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "masterpiece, best quality, detailed face, coherent eyes, natural expression, matching hair and eye colors, consistent illustration style"
+      ]
+    },
+    {
+      "id": 16,
+      "type": "FaceDetailer",
+      "title": "12 · ROSTO · refino localizado",
+      "pos": [
+        3060,
+        80
+      ],
+      "size": [
+        350,
+        1000
+      ],
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 21
+        },
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 22
+        },
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 23
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 24
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 25
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 26
+        },
+        {
+          "name": "bbox_detector",
+          "type": "BBOX_DETECTOR",
+          "link": 27
+        },
+        {
+          "name": "sam_model_opt",
+          "type": "SAM_MODEL",
+          "link": null
+        },
+        {
+          "name": "segm_detector_opt",
+          "type": "SEGM_DETECTOR",
+          "link": null
+        },
+        {
+          "name": "detailer_hook",
+          "type": "DETAILER_HOOK",
+          "link": null
+        },
+        {
+          "name": "scheduler_func_opt",
+          "type": "SCHEDULER_FUNC",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            29
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "cropped_refined",
+          "type": "IMAGE",
+          "links": [],
+          "slot_index": 1,
+          "shape": 6
+        },
+        {
+          "name": "cropped_enhanced_alpha",
+          "type": "IMAGE",
+          "links": [],
+          "slot_index": 2,
+          "shape": 6
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "links": [],
+          "slot_index": 3
+        },
+        {
+          "name": "detailer_pipe",
+          "type": "DETAILER_PIPE",
+          "links": [],
+          "slot_index": 4
+        },
+        {
+          "name": "cnet_images",
+          "type": "IMAGE",
+          "links": [],
+          "slot_index": 5,
+          "shape": 6
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FaceDetailer"
+      },
+      "widgets_values": [
+        512,
+        true,
+        768,
+        20261104,
+        "fixed",
+        20,
+        4.0,
+        "euler",
+        "simple",
+        0.22,
+        12,
+        true,
+        true,
+        0.45,
+        10,
+        2.5,
+        "center-1",
+        0,
+        0.93,
+        0,
+        0.7,
+        "False",
+        10,
+        "",
+        1,
+        false,
+        20,
+        false,
+        false
+      ]
+    },
+    {
+      "id": 17,
+      "type": "SaveImage",
+      "title": "13 · Comparação: ANTES do refinamento",
+      "pos": [
+        3510,
+        80
+      ],
+      "size": [
+        480,
+        430
+      ],
+      "flags": {},
+      "order": 16,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 28
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "Axo/Personagem/antes"
+      ]
+    },
+    {
+      "id": 18,
+      "type": "SaveImage",
+      "title": "14 · RESULTADO FINAL",
+      "pos": [
+        3510,
+        570
+      ],
+      "size": [
+        480,
+        520
+      ],
+      "flags": {},
+      "order": 17,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 29
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "Axo/Personagem/final"
+      ]
+    },
+    {
+      "id": 19,
+      "type": "MarkdownNote",
+      "title": "LEIA PRIMEIRO · Instalação e modelos",
+      "pos": [
+        40,
+        -850
+      ],
+      "size": [
+        1180,
+        800
+      ],
+      "flags": {},
+      "order": 18,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "MarkdownNote"
+      },
+      "widgets_values": [
+        "# Axo · Anima: personagem em novas poses e cenas\nWorkflow experimental. Importar o JSON não instala extensões.\n\n## Instale estes 3 pacotes e reinicie o ComfyUI\n- Anima Ref Adapter: https://github.com/ArcAnima/ComfyUI-Anima-Ref-Adapter\n- Impact Pack: https://github.com/ltdrdata/ComfyUI-Impact-Pack\n- Impact Subpack: https://github.com/ltdrdata/ComfyUI-Impact-Subpack\nNo notebook Axo atualizado, selecione INTERFACE=ComfyUI e mantenha ENABLE_CHARACTER_WORKFLOW=True. Execute Install and launch: os pacotes e pesos serão instalados automaticamente e este workflow aparecerá no menu Workflows.\nEm uma instalação independente, use o ComfyUI Manager ou siga as instruções dos repositórios. Se houver nós vermelhos, falta carregar o pacote correspondente: instale-o, reinicie o servidor e recarregue a página.\n\n## Pesos\nAnima base v1.0 + qwen_3_06b_base + qwen_image_vae:\nhttps://huggingface.co/circlestone-labs/Anima/tree/main/split_files\nO adaptador baixa anima_ref_adapter_v2_r64.safetensors (~183 MB) no primeiro uso, da fonte:\nhttps://huggingface.co/ElectronGirl/anima-ref-adapter\nSe necessário, baixe manualmente para models/loras.\n\nDetecção: coloque face_yolov8n.pt e hand_yolov8n.pt em ComfyUI/models/ultralytics/bbox/:\nhttps://huggingface.co/Bingsu/adetailer/tree/main\nSe já os tem na pasta adetailer do Drive, COPIE para essa pasta ou registre-a como ultralytics_bbox em extra_model_paths.yaml.\nNão precisa de SAM, IPAdapter SDXL ou pesos de refiner SDXL.\n"
+      ]
+    },
+    {
+      "id": 20,
+      "type": "MarkdownNote",
+      "title": "COMO USAR · Referência, pose e cena",
+      "pos": [
+        1290,
+        -850
+      ],
+      "size": [
+        1180,
+        800
+      ],
+      "flags": {},
+      "order": 19,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "MarkdownNote"
+      },
+      "widgets_values": [
+        "# Primeiro teste\n1. Em 04, envie uma imagem nítida de UMA personagem (corpo e rosto visíveis, pouco fundo). reference.png é só o nome inicial: substitua pelo seu upload.\n2. Confira os nomes dos três modelos. Em uma instalação padrão são nomes simples; se houver subpastas, selecione a opção correta.\n3. Em 06, descreva a NOVA pose, local e enquadramento. Troque 1girl por 1boy se necessário. Não é necessário repetir roupa ou nome da personagem. Comece com pose simples.\n4. Clique em Run. A referência condiciona o modelo; a geração começa de ruído, não do latent da sua imagem. Assim ela pode mudar a pose e a cena.\n5. Compare as saídas ANTES e FINAL. Ambas são salvas, em Axo/Personagem.\n\n## Ajustes\n- Pouca semelhança: referência mais limpa; ref_guidance 4.5 → 5.5; ref_end 0.65 → 1.0. Mais força também pode copiar estilo/composição ou saturar.\n- Para repetir uma composição: mude randomize para fixed no KSampler.\n- VRAM: batch 1. Comece em 832×1216. Se faltar memória, teste 768×1024 e ref_megapixels 0.5.\n- Este adaptador foi projetado para Anima BASE v1.0. Derivados precisam de teste; não substitua o modelo por SDXL/Flux.\n- Este fluxo recebe a pose por TEXTO. Não inclui OpenPose nem uma segunda imagem para controlar a pose.\n"
+      ]
+    },
+    {
+      "id": 21,
+      "type": "MarkdownNote",
+      "title": "REFINAMENTO · Limites e recuperação",
+      "pos": [
+        2540,
+        -850
+      ],
+      "size": [
+        1450,
+        800
+      ],
+      "flags": {},
+      "order": 20,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "MarkdownNote"
+      },
+      "widgets_values": [
+        "# Mãos → rosto\nSão dois FaceDetailer: o primeiro usa detector de MÃOS, o segundo de ROSTO. Ambos fazem inpaint localizado com o Anima base; o nome FaceDetailer não limita o detector ao rosto.\n- Mãos: denoise 0.35; rosto: 0.22; 20 steps, CFG 4, Euler/simple, cycle 1. Comece assim.\n- Se mudar a identidade/cores: reduza denoise do rosto para 0.15–0.20 e acrescente traços da personagem no prompt local.\n- Se a mão continuar ruim: tente denoise 0.40–0.45, compare ANTES/FINAL. Valores altos podem piorar a pose.\n- Se nada for detectado, a imagem passa sem refinamento. Detectores podem falhar em anime, mãos escondidas ou muito deformadas. Corrigir esses casos pode exigir máscara manual ou nova seed.\n- Para desligar uma etapa, selecione o FaceDetailer e use Bypass (Ctrl+B). O restante do grafo continua conectado.\n- O refinamento usa o modelo BASE sem referência para evitar trazer o corpo inteiro para um recorte do rosto/mão. A identidade depende da imagem gerada e de denoise baixo.\n\nReduz deformações; NÃO garante anatomia perfeita nem identidade idêntica. Não consegue reconstruir com certeza dedos ocultos ou remover todos os membros extras. Este JSON foi validado estruturalmente contra as definições dos nós; geração com GPU ainda não testada aqui.\n\n## Fontes das interfaces\nAnima Ref Adapter: 99c222e1c2da472f4b514583b2dbd1b5afb4bdd9\nImpact Pack: eace4a9059908330936c6514f35f5e0c84935394\nAs fontes acima documentam os nós, parâmetros e limitações. Mantenha ComfyUI e extensões compatíveis/atualizados.\n"
+      ]
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      0,
+      5,
+      0,
+      "MODEL"
+    ],
+    [
+      2,
+      3,
+      0,
+      5,
+      1,
+      "VAE"
+    ],
+    [
+      3,
+      4,
+      0,
+      5,
+      2,
+      "IMAGE"
+    ],
+    [
+      4,
+      2,
+      0,
+      6,
+      0,
+      "CLIP"
+    ],
+    [
+      5,
+      2,
+      0,
+      7,
+      0,
+      "CLIP"
+    ],
+    [
+      6,
+      5,
+      0,
+      9,
+      0,
+      "MODEL"
+    ],
+    [
+      7,
+      6,
+      0,
+      9,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      8,
+      7,
+      0,
+      9,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      9,
+      8,
+      0,
+      9,
+      3,
+      "LATENT"
+    ],
+    [
+      10,
+      9,
+      0,
+      10,
+      0,
+      "LATENT"
+    ],
+    [
+      11,
+      3,
+      0,
+      10,
+      1,
+      "VAE"
+    ],
+    [
+      12,
+      2,
+      0,
+      12,
+      0,
+      "CLIP"
+    ],
+    [
+      13,
+      10,
+      0,
+      13,
+      0,
+      "IMAGE"
+    ],
+    [
+      14,
+      1,
+      0,
+      13,
+      1,
+      "MODEL"
+    ],
+    [
+      15,
+      2,
+      0,
+      13,
+      2,
+      "CLIP"
+    ],
+    [
+      16,
+      3,
+      0,
+      13,
+      3,
+      "VAE"
+    ],
+    [
+      17,
+      12,
+      0,
+      13,
+      4,
+      "CONDITIONING"
+    ],
+    [
+      18,
+      7,
+      0,
+      13,
+      5,
+      "CONDITIONING"
+    ],
+    [
+      19,
+      11,
+      0,
+      13,
+      6,
+      "BBOX_DETECTOR"
+    ],
+    [
+      20,
+      2,
+      0,
+      15,
+      0,
+      "CLIP"
+    ],
+    [
+      21,
+      13,
+      0,
+      16,
+      0,
+      "IMAGE"
+    ],
+    [
+      22,
+      1,
+      0,
+      16,
+      1,
+      "MODEL"
+    ],
+    [
+      23,
+      2,
+      0,
+      16,
+      2,
+      "CLIP"
+    ],
+    [
+      24,
+      3,
+      0,
+      16,
+      3,
+      "VAE"
+    ],
+    [
+      25,
+      15,
+      0,
+      16,
+      4,
+      "CONDITIONING"
+    ],
+    [
+      26,
+      7,
+      0,
+      16,
+      5,
+      "CONDITIONING"
+    ],
+    [
+      27,
+      14,
+      0,
+      16,
+      6,
+      "BBOX_DETECTOR"
+    ],
+    [
+      28,
+      10,
+      0,
+      17,
+      0,
+      "IMAGE"
+    ],
+    [
+      29,
+      16,
+      0,
+      18,
+      0,
+      "IMAGE"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "1 · Modelos + referência da personagem",
+      "bounding": [
+        10,
+        20,
+        800,
+        880
+      ],
+      "color": "#79518c",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 2,
+      "title": "2 · Nova pose e cena: geração por referência",
+      "bounding": [
+        850,
+        20,
+        890,
+        880
+      ],
+      "color": "#3b7892",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 3,
+      "title": "3 · Refinar mãos",
+      "bounding": [
+        1780,
+        20,
+        800,
+        1110
+      ],
+      "color": "#967347",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 4,
+      "title": "4 · Refinar rosto",
+      "bounding": [
+        2630,
+        20,
+        800,
+        1110
+      ],
+      "color": "#967347",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 5,
+      "title": "5 · Comparação e arquivos finais",
+      "bounding": [
+        3480,
+        20,
+        550,
+        1110
+      ],
+      "color": "#46795c",
+      "font_size": 24,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "version": 0.4,
+  "extra": {
+    "ds": {
+      "scale": 0.42,
+      "offset": [
+        20,
+        900
+      ]
+    },
+    "axo_workflow": "Anima character reference + hands + face / experimental v1",
+    "requires": [
+      "ComfyUI-Anima-Ref-Adapter",
+      "ComfyUI-Impact-Pack",
+      "ComfyUI-Impact-Subpack"
+    ]
+  }
+}

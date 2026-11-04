@@ -13,6 +13,20 @@ def prepare_civicomfy():
             raise RuntimeError('Incomplete Civicomfy installation: ' + relative)
 
 
+def prepare_character_workspace():
+    print('Installing character reference, hand and face refinement dependencies…', flush=True)
+    # Run the maintained standalone installer in a separate namespace so its
+    # imports/helpers cannot replace the main launcher's runtime or processes.
+    setup = {'__name__': 'axo_character_setup'}
+    exec(compile(AXO_COMFY_FILES['character_setup.py'], 'character_setup.py', 'exec'), setup)
+    setup.update(COMFY_DIR=COMFY, COMFY_PYTHON=PYTHON)
+    setup['main'](standalone=False)
+    destination = ROOT / 'comfy-user/default/workflows/Axo Anima Personagem e Refino.json'
+    if not destination.exists():
+        destination.write_text(AXO_COMFY_FILES['character.json'], encoding='utf-8')
+    print('Open Workflows → Axo Anima Personagem e Refino. Upload your character image before running.', flush=True)
+
+
 def prepare_comfy():
     print('Installing ComfyUI in its isolated runtime…', flush=True)
     clone_at('https://github.com/Comfy-Org/ComfyUI.git', COMFY, COMFY_REVISION)
@@ -120,6 +134,12 @@ def wait_comfy(server):
             if response.ok:
                 nodes = response.json()
                 required = {'UNETLoader', 'CLIPLoader', 'VAELoader', 'CheckpointLoaderSimple', 'KSampler'}
+                if ENABLE_CHARACTER_WORKFLOW:
+                    character_nodes = {'FaceDetailer', 'UltralyticsDetectorProvider', 'AnimaRefAdapter'}
+                    missing = character_nodes - nodes.keys()
+                    if missing:
+                        raise RuntimeError('Character workflow nodes failed to load: ' + ', '.join(sorted(missing))
+                                           + '. Inspect comfy.log and rerun Install and launch.')
                 if not required.issubset(nodes):
                     raise RuntimeError('Required ComfyUI nodes missing. Inspect comfy.log.')
                 status = requests.get('http://127.0.0.1:8188/civitai/status', timeout=10)
