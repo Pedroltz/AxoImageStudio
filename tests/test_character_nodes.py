@@ -22,6 +22,15 @@ def controls(monkeypatch):
     adapter.return_value.apply.return_value = ('reference-model',)
     core = SimpleNamespace(LoadImage=loader, LoraLoaderModelOnly=lora,
                            NODE_CLASS_MAPPINGS={'AnimaRefAdapter': adapter})
+    for name in ('ImageScale', 'KSampler', 'VAEEncodeTiled', 'VAEEncode', 'VAEDecodeTiled', 'VAEDecode'):
+        setattr(core, name, Mock())
+    core.KSampler.INPUT_TYPES.return_value = {'required': {'sampler_name': (['euler'],), 'scheduler': (['simple'],)}}
+    core.ImageScale.return_value.upscale.return_value = ('enlarged',)
+    core.VAEEncodeTiled.return_value.encode.return_value = ({'samples':'source-latent'},)
+    core.VAEEncode.return_value.encode.return_value = ({'samples':'source-latent'},)
+    core.KSampler.return_value.sample.return_value = ({'samples':'refined-latent'},)
+    core.VAEDecodeTiled.return_value.decode.return_value = ('final-image',)
+    core.VAEDecode.return_value.decode.return_value = ('final-image',)
     monkeypatch.setitem(sys.modules, 'nodes', core)
     monkeypatch.setitem(sys.modules, 'folder_paths', SimpleNamespace(get_filename_list=lambda kind:
         ['style.safetensors', 'character.safetensors', 'anima_ref_adapter_v2_r64.safetensors']))
@@ -85,3 +94,42 @@ def test_schema_offers_empty_slots_and_optional_upload(controls):
     assert reference['image'][0][0] == 'Nenhuma'
     assert reference['image'][1]['image_upload'] is True
     assert reference['use_reference'][1]['default'] is False
+
+
+def test_disabled_hires_returns_exact_image_without_extra_processing(controls):
+    module, core, _ = controls
+    image = object()
+    assert module.AxoOptionalHires().upscale(image, 'model', 'vae', 'positive', 'negative') == (image,)
+    for name in ('ImageScale', 'KSampler', 'VAEEncodeTiled', 'VAEDecodeTiled'):
+        getattr(core,name).assert_not_called()
+
+
+@pytest.mark.parametrize('tiled', [True, False])
+def test_hires_scales_and_resamples_with_selected_model_and_parameters(controls, tiled):
+    module, core, _ = controls
+    image = SimpleNamespace(shape=(1,1216,832,3))
+    result = module.AxoOptionalHires().upscale(image, 'model-with-loras-and-reference', 'vae',
+        'style-positive', 'negative', enabled=True, scale=1.5, denoise=0.2, steps=16,
+        cfg=4, seed=123, tiled_vae=tiled)
+    assert result == ('final-image',)
+    core.ImageScale.return_value.upscale.assert_called_once_with(image,'bicubic',1248,1824,'disabled')
+    call = core.KSampler.return_value.sample.call_args
+    assert call.args[:8] == ('model-with-loras-and-reference',123,16,4,'euler','simple','style-positive','negative')
+    assert call.kwargs == {'denoise':0.2}
+    assert core.VAEEncodeTiled.called is tiled
+    assert core.VAEEncode.called is not tiled
+
+
+def test_hires_zero_denoise_only_resizes(controls):
+    module, core, _ = controls
+    image = SimpleNamespace(shape=(1,1216,832,3))
+    assert module.AxoOptionalHires().upscale(image,'model','vae','pos','neg',enabled=True,denoise=0) == ('enlarged',)
+    core.KSampler.assert_not_called()
+    core.VAEEncodeTiled.assert_not_called()
+
+
+def test_hires_schema_is_optional_and_configurable(controls):
+    module, _, _ = controls
+    fields = module.AxoOptionalHires.INPUT_TYPES()['required']
+    assert fields['enabled'][1]['default'] is False
+    assert {'scale','denoise','steps','cfg','seed','sampler_name','scheduler','upscale_method','tiled_vae'} <= fields.keys()

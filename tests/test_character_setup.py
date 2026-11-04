@@ -4,11 +4,17 @@ import json
 from pathlib import Path
 from unittest.mock import Mock
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_reference_workflow_connections_and_refinement_order():
-    graph = json.loads((ROOT / 'workflows/Axo_Anima_Personagem_Refino.json').read_text(encoding='utf-8'))
+@pytest.mark.parametrize('filename,prefix', [
+    ('Axo_Anima_Personagem_Refino.json', 'Axo/Personagem'),
+    ('Axo_Anima_Kaenuco_Style.json', 'Axo/Kaenuco'),
+])
+def test_reference_workflow_connections_and_refinement_order(filename, prefix):
+    graph = json.loads((ROOT / 'workflows' / filename).read_text(encoding='utf-8'))
     nodes = {node['id']: node for node in graph['nodes']}
     for link, source, slot, target, target_slot, kind in graph['links']:
         assert link in nodes[source]['outputs'][slot]['links']
@@ -18,17 +24,22 @@ def test_reference_workflow_connections_and_refinement_order():
     assert adapter['widgets_values'][:2] == [False, 'Nenhuma']
     assert not any(n['type'] == 'LoadImage' for n in nodes.values())
     loras = next(n for n in nodes.values() if n['type'] == 'AxoAnimaLoraStack')
-    assert loras['widgets_values'] == ['Nenhuma', 0.8, 'Nenhuma', 0.8, 'Nenhuma', 0.8]
+    expected_lora = 'Kaenuco-Anima-A52.safetensors' if 'Kaenuco' in filename else 'Nenhuma'
+    assert loras['widgets_values'] == [expected_lora, 0.8, 'Nenhuma', 0.8, 'Nenhuma', 0.8]
     sampler = next(n for n in nodes.values() if n['type'] == 'KSampler')
     assert sampler['inputs'][0]['link'] in adapter['outputs'][0]['links']
+    hires = next(n for n in nodes.values() if n['type'] == 'AxoOptionalHires')
+    assert hires['widgets_values'][:3] == [False,1.5,0.2]
+    assert hires['inputs'][1]['link'] in adapter['outputs'][0]['links']
     latent = next(n for n in nodes.values() if n['type'] == 'EmptyLatentImage')
     assert sampler['inputs'][3]['link'] in latent['outputs'][0]['links']
     hands = next(n for n in nodes.values() if n['type'] == 'FaceDetailer' and 'MÃOS' in n['title'])
     face = next(n for n in nodes.values() if n['type'] == 'FaceDetailer' and 'ROSTO' in n['title'])
+    assert hands['inputs'][0]['link'] in hires['outputs'][0]['links']
     assert face['inputs'][0]['link'] in hands['outputs'][0]['links']
     assert hands['inputs'][1]['link'] in loras['outputs'][0]['links']
     assert face['inputs'][1]['link'] in loras['outputs'][0]['links']
-    final = next(n for n in nodes.values() if n['type'] == 'SaveImage' and n['widgets_values'] == ['Axo/Personagem/final'])
+    final = next(n for n in nodes.values() if n['type'] == 'SaveImage' and n['widgets_values'] == [prefix + '/final'])
     assert final['inputs'][0]['link'] in face['outputs'][0]['links']
 
 

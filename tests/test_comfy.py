@@ -21,6 +21,7 @@ def launcher(tmp_path):
                               for p in (ROOT / 'comfy_backend').iterdir() if p.is_file()}
     ns['AXO_COMFY_FILES']['character_setup.py'] = (ROOT / 'workflows/Instalar_Dependencias_Personagem.py').read_text(encoding='utf-8')
     ns['AXO_COMFY_FILES']['character.json'] = (ROOT / 'workflows/Axo_Anima_Personagem_Refino.json').read_text(encoding='utf-8')
+    ns['AXO_COMFY_FILES']['kaenuco.json'] = (ROOT / 'workflows/Axo_Anima_Kaenuco_Style.json').read_text(encoding='utf-8')
     exec(compile(ns['AXO_COMFY_FILES']['backend.py'], 'backend.py', 'exec'), ns)
     ns.update(ROOT=tmp_path, MODELS=tmp_path / 'models', AXO_OUTPUT_ROOT=tmp_path / 'outputs',
               COMFY=tmp_path / 'comfy', INTERFACE='ComfyUI')
@@ -93,7 +94,7 @@ def test_ready_checks_civicomfy_backend(launcher, loaded):
     ns = launcher
     nodes = dict.fromkeys(('UNETLoader', 'CLIPLoader', 'VAELoader', 'CheckpointLoaderSimple', 'KSampler',
                           'FaceDetailer', 'UltralyticsDetectorProvider', 'AnimaRefAdapter',
-                          'AxoAnimaLoraStack', 'AxoOptionalAnimaReference'))
+                          'AxoAnimaLoraStack', 'AxoOptionalAnimaReference', 'AxoOptionalHires'))
     ns['requests'] = SimpleNamespace(RequestException=OSError, get=Mock(side_effect=[
         SimpleNamespace(ok=True, json=lambda: nodes),
         SimpleNamespace(ok=loaded, json=lambda: {'downloads': []}),
@@ -200,6 +201,7 @@ def test_notebook_embeds_backend_and_workflows():
                 if p.is_file() and p.suffix in {'.py', '.js', '.json'}}
     expected['character_setup.py'] = (ROOT / 'workflows/Instalar_Dependencias_Personagem.py').read_text(encoding='utf-8')
     expected['character.json'] = (ROOT / 'workflows/Axo_Anima_Personagem_Refino.json').read_text(encoding='utf-8')
+    expected['kaenuco.json'] = (ROOT / 'workflows/Axo_Anima_Kaenuco_Style.json').read_text(encoding='utf-8')
     assert embedded == expected
 
 
@@ -215,10 +217,12 @@ def test_character_setup_isolated_and_preserves_saved_workflow(launcher):
     ns['prepare_character_workspace']()
     assert ns['run'] is original_run
     assert (ns['COMFY'] / 'character-installed').is_file()
-    saved = ns['ROOT'] / 'comfy-user/default/workflows/Axo Anima Personagem e Refino v2.json'
+    saved = ns['ROOT'] / 'comfy-user/default/workflows/Axo Anima Personagem e Refino v3.json'
     graph = json.loads(saved.read_text(encoding='utf-8'))
     types = {n['type'] for n in graph['nodes']}
-    assert {'FaceDetailer', 'UltralyticsDetectorProvider', 'AxoOptionalAnimaReference', 'AxoAnimaLoraStack'} <= types
+    assert {'FaceDetailer', 'UltralyticsDetectorProvider', 'AxoOptionalAnimaReference', 'AxoAnimaLoraStack', 'AxoOptionalHires'} <= types
+    kaenuco = saved.with_name('Axo Anima Kaenuco Style Hires.json')
+    assert 'Kaenuco-Anima-A52.safetensors' in kaenuco.read_text(encoding='utf-8')
     saved.write_text('{"edited":true}', encoding='utf-8')
     ns['prepare_character_workspace']()
     assert json.loads(saved.read_text()) == {'edited': True}

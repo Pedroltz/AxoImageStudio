@@ -1,6 +1,6 @@
 {
-  "last_node_id": 21,
-  "last_link_id": 29,
+  "last_node_id": 23,
+  "last_link_id": 35,
   "nodes": [
     {
       "id": 1,
@@ -100,7 +100,8 @@
             3,
             11,
             16,
-            24
+            24,
+            32
           ],
           "slot_index": 0
         }
@@ -190,7 +191,8 @@
           "name": "MODEL",
           "type": "MODEL",
           "links": [
-            6
+            6,
+            31
           ],
           "slot_index": 0
         }
@@ -233,7 +235,8 @@
           "name": "CONDITIONING",
           "type": "CONDITIONING",
           "links": [
-            7
+            7,
+            33
           ],
           "slot_index": 0
         }
@@ -274,7 +277,8 @@
           "links": [
             8,
             18,
-            26
+            26,
+            34
           ],
           "slot_index": 0
         }
@@ -413,8 +417,8 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            13,
-            28
+            28,
+            30
           ],
           "slot_index": 0
         }
@@ -429,7 +433,7 @@
       "type": "UltralyticsDetectorProvider",
       "title": "11 · MÃOS · detector",
       "pos": [
-        1810,
+        2260,
         80
       ],
       "size": [
@@ -468,7 +472,7 @@
       "type": "CLIPTextEncode",
       "title": "11 · MÃOS · prompt local editável",
       "pos": [
-        1810,
+        2260,
         310
       ],
       "size": [
@@ -507,7 +511,7 @@
       "type": "FaceDetailer",
       "title": "11 · MÃOS · refino localizado",
       "pos": [
-        2210,
+        2660,
         80
       ],
       "size": [
@@ -521,7 +525,7 @@
         {
           "name": "image",
           "type": "IMAGE",
-          "link": 13
+          "link": 35
         },
         {
           "name": "model",
@@ -657,7 +661,7 @@
       "type": "UltralyticsDetectorProvider",
       "title": "12 · ROSTO · detector",
       "pos": [
-        2660,
+        3110,
         80
       ],
       "size": [
@@ -696,7 +700,7 @@
       "type": "CLIPTextEncode",
       "title": "12 · ROSTO · prompt local editável",
       "pos": [
-        2660,
+        3110,
         310
       ],
       "size": [
@@ -735,7 +739,7 @@
       "type": "FaceDetailer",
       "title": "12 · ROSTO · refino localizado",
       "pos": [
-        3060,
+        3510,
         80
       ],
       "size": [
@@ -885,7 +889,7 @@
       "type": "SaveImage",
       "title": "13 · Comparação: ANTES do refinamento",
       "pos": [
-        3510,
+        3960,
         80
       ],
       "size": [
@@ -915,7 +919,7 @@
       "type": "SaveImage",
       "title": "14 · RESULTADO FINAL",
       "pos": [
-        3510,
+        3960,
         570
       ],
       "size": [
@@ -993,7 +997,7 @@
       "type": "MarkdownNote",
       "title": "REFINAMENTO · Limites e recuperação",
       "pos": [
-        2540,
+        2990,
         -850
       ],
       "size": [
@@ -1010,6 +1014,99 @@
       },
       "widgets_values": [
         "# Mãos → rosto\nSão dois FaceDetailer: o primeiro usa detector de MÃOS, o segundo de ROSTO. Ambos fazem inpaint localizado com o Anima base; o nome FaceDetailer não limita o detector ao rosto.\n- Mãos: denoise 0.35; rosto: 0.22; 20 steps, CFG 4, Euler/simple, cycle 1. Comece assim.\n- Se mudar a identidade/cores: reduza denoise do rosto para 0.15–0.20 e acrescente traços da personagem no prompt local.\n- Se a mão continuar ruim: tente denoise 0.40–0.45, compare ANTES/FINAL. Valores altos podem piorar a pose.\n- Se nada for detectado, a imagem passa sem refinamento. Detectores podem falhar em anime, mãos escondidas ou muito deformadas. Corrigir esses casos pode exigir máscara manual ou nova seed.\n- Para desligar uma etapa, selecione o FaceDetailer e use Bypass (Ctrl+B). O restante do grafo continua conectado.\n- O refinamento usa Anima + as LoRAs selecionadas, sem a referência visual, para evitar trazer o corpo inteiro para um recorte do rosto/mão. A identidade depende da imagem gerada e de denoise baixo. Repita trigger words relevantes nos prompts locais se necessário.\n\nReduz deformações; NÃO garante anatomia perfeita nem identidade idêntica. Não consegue reconstruir com certeza dedos ocultos ou remover todos os membros extras. Este JSON foi validado estruturalmente contra as definições dos nós; geração com GPU ainda não testada aqui.\n\n## Fontes das interfaces\nAnima Ref Adapter: 99c222e1c2da472f4b514583b2dbd1b5afb4bdd9\nImpact Pack: eace4a9059908330936c6514f35f5e0c84935394\nAs fontes acima documentam os nós, parâmetros e limitações. Mantenha ComfyUI e extensões compatíveis/atualizados.\n"
+      ]
+    },
+    {
+      "id": 22,
+      "type": "AxoOptionalHires",
+      "title": "HIRES OPCIONAL · desligado · escala, denoise e steps",
+      "pos": [
+        1810,
+        80
+      ],
+      "size": [
+        370,
+        630
+      ],
+      "flags": {},
+      "order": 21,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 30
+        },
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 31
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 32
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 33
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 34
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            35
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AxoOptionalHires"
+      },
+      "widgets_values": [
+        false,
+        1.5,
+        0.2,
+        16,
+        4.0,
+        20261104,
+        "fixed",
+        "euler",
+        "simple",
+        "bicubic",
+        true
+      ]
+    },
+    {
+      "id": 23,
+      "type": "MarkdownNote",
+      "title": "HIRES · Como configurar e economizar memória",
+      "pos": [
+        1810,
+        1250
+      ],
+      "size": [
+        1250,
+        650
+      ],
+      "flags": {},
+      "order": 22,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "MarkdownNote"
+      },
+      "widgets_values": [
+        "## Hires / Upscale opcional\nO Hires começa DESLIGADO. Ative enabled no nó HIRES OPCIONAL para aumentar a resolução antes do refino de mãos e rosto.\nPonto de partida: escala 1.5×, denoise 0.20, 16 steps, CFG 4, Euler/simple. 832×1216 passa para 1248×1824. Tamanho arredondado à grade de 16 pixels.\nDesligado: a imagem passa intacta, sem upscale, encode/decode nem amostragem adicional. Denoise 0 com Hires ligado faz apenas o redimensionamento bicubic/lanczos.\nDenoise maior redesenha mais a imagem e pode mudar rosto, estilo e mãos; comece em 0.15–0.25. Escala 2× exige bem mais VRAM e tempo. Para pouca memória, prefira 1.25× ou deixe desligado.\ntiled_vae reduz memória só no encode/decode VAE, não divide o sampler em blocos. Não garante que a GPU consiga processar qualquer resolução. O mesmo modelo com LoRAs, prompt e referência opcional alimenta o Hires.\nPara repetir o Hires, mantenha sua seed em fixed. Antes é salvo na resolução base; Final inclui Hires (se ligado) e refinamentos.\nEste nó Axo exige o notebook atualizado: reabra o link novo e execute Install and launch; só importar o JSON na versão anterior deixará o nó ausente.\n"
       ]
     }
   ],
@@ -1109,14 +1206,6 @@
       12,
       0,
       "CLIP"
-    ],
-    [
-      13,
-      10,
-      0,
-      13,
-      0,
-      "IMAGE"
     ],
     [
       14,
@@ -1245,6 +1334,54 @@
       18,
       0,
       "IMAGE"
+    ],
+    [
+      30,
+      10,
+      0,
+      22,
+      0,
+      "IMAGE"
+    ],
+    [
+      31,
+      5,
+      0,
+      22,
+      1,
+      "MODEL"
+    ],
+    [
+      32,
+      3,
+      0,
+      22,
+      2,
+      "VAE"
+    ],
+    [
+      33,
+      6,
+      0,
+      22,
+      3,
+      "CONDITIONING"
+    ],
+    [
+      34,
+      7,
+      0,
+      22,
+      4,
+      "CONDITIONING"
+    ],
+    [
+      35,
+      22,
+      0,
+      13,
+      0,
+      "IMAGE"
     ]
   ],
   "groups": [
@@ -1278,7 +1415,7 @@
       "id": 3,
       "title": "3 · Refinar mãos",
       "bounding": [
-        1780,
+        2230,
         20,
         800,
         1110
@@ -1291,7 +1428,7 @@
       "id": 4,
       "title": "4 · Refinar rosto",
       "bounding": [
-        2630,
+        3080,
         20,
         800,
         1110
@@ -1304,12 +1441,25 @@
       "id": 5,
       "title": "5 · Comparação e arquivos finais",
       "bounding": [
-        3480,
+        3930,
         20,
         550,
         1110
       ],
       "color": "#46795c",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 6,
+      "title": "Hires / Upscale OPCIONAL",
+      "bounding": [
+        1780,
+        20,
+        430,
+        1110
+      ],
+      "color": "#4b748f",
       "font_size": 24,
       "flags": {}
     }
@@ -1324,7 +1474,7 @@
         900
       ]
     },
-    "axo_workflow": "Anima optional reference + 3 optional LoRAs + hands + face / experimental v2",
+    "axo_workflow": "Anima optional reference + 3 optional LoRAs + hands + face / experimental v2 / optional Hires",
     "requires": [
       "ComfyUI-Anima-Ref-Adapter",
       "ComfyUI-Impact-Pack",

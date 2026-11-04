@@ -31,6 +31,7 @@ def build():
                    if p.is_file() and p.suffix in {'.py', '.js', '.json'}}
     comfy_files['character_setup.py'] = (ROOT / 'workflows/Instalar_Dependencias_Personagem.py').read_text(encoding='utf-8')
     comfy_files['character.json'] = (ROOT / 'workflows/Axo_Anima_Personagem_Refino.json').read_text(encoding='utf-8')
+    comfy_files['kaenuco.json'] = (ROOT / 'workflows/Axo_Anima_Kaenuco_Style.json').read_text(encoding='utf-8')
     embedded = ''.join(lines).replace(
         'AXO_COMFY_FILES = None  # Embedded by tools/build_notebook.py',
         'AXO_COMFY_FILES = ' + repr(comfy_files))
