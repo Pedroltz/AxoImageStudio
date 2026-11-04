@@ -92,7 +92,8 @@ def test_civitai_secret_only_passed_to_comfy_child(launcher, monkeypatch):
 def test_ready_checks_civicomfy_backend(launcher, loaded):
     ns = launcher
     nodes = dict.fromkeys(('UNETLoader', 'CLIPLoader', 'VAELoader', 'CheckpointLoaderSimple', 'KSampler',
-                          'FaceDetailer', 'UltralyticsDetectorProvider', 'AnimaRefAdapter'))
+                          'FaceDetailer', 'UltralyticsDetectorProvider', 'AnimaRefAdapter',
+                          'AxoAnimaLoraStack', 'AxoOptionalAnimaReference'))
     ns['requests'] = SimpleNamespace(RequestException=OSError, get=Mock(side_effect=[
         SimpleNamespace(ok=True, json=lambda: nodes),
         SimpleNamespace(ok=loaded, json=lambda: {'downloads': []}),
@@ -214,10 +215,10 @@ def test_character_setup_isolated_and_preserves_saved_workflow(launcher):
     ns['prepare_character_workspace']()
     assert ns['run'] is original_run
     assert (ns['COMFY'] / 'character-installed').is_file()
-    saved = ns['ROOT'] / 'comfy-user/default/workflows/Axo Anima Personagem e Refino.json'
+    saved = ns['ROOT'] / 'comfy-user/default/workflows/Axo Anima Personagem e Refino v2.json'
     graph = json.loads(saved.read_text(encoding='utf-8'))
     types = {n['type'] for n in graph['nodes']}
-    assert {'FaceDetailer', 'UltralyticsDetectorProvider', 'AnimaRefAdapter'} <= types
+    assert {'FaceDetailer', 'UltralyticsDetectorProvider', 'AxoOptionalAnimaReference', 'AxoAnimaLoraStack'} <= types
     saved.write_text('{"edited":true}', encoding='utf-8')
     ns['prepare_character_workspace']()
     assert json.loads(saved.read_text()) == {'edited': True}

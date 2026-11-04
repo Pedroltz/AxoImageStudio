@@ -21,10 +21,10 @@ def prepare_character_workspace():
     exec(compile(AXO_COMFY_FILES['character_setup.py'], 'character_setup.py', 'exec'), setup)
     setup.update(COMFY_DIR=COMFY, COMFY_PYTHON=PYTHON)
     setup['main'](standalone=False)
-    destination = ROOT / 'comfy-user/default/workflows/Axo Anima Personagem e Refino.json'
+    destination = ROOT / 'comfy-user/default/workflows/Axo Anima Personagem e Refino v2.json'
     if not destination.exists():
         destination.write_text(AXO_COMFY_FILES['character.json'], encoding='utf-8')
-    print('Open Workflows → Axo Anima Personagem e Refino. Upload your character image before running.', flush=True)
+    print('Open Workflows → Axo Anima Personagem e Refino v2. Image reference and up to three Anima LoRAs are optional.', flush=True)
 
 
 def prepare_comfy():
@@ -80,7 +80,7 @@ def configure_comfy():
     extension = COMFY / 'custom_nodes/axo_starter'
     web = extension / 'web'
     web.mkdir(parents=True, exist_ok=True)
-    (extension / '__init__.py').write_text("WEB_DIRECTORY = './web'\nNODE_CLASS_MAPPINGS = {}\n", encoding='utf-8')
+    (extension / '__init__.py').write_text(AXO_COMFY_FILES['character_nodes.py'], encoding='utf-8')
     (web / 'starter.js').write_text(AXO_COMFY_FILES['starter.js'], encoding='utf-8')
     (web / 'initial.json').write_text(AXO_COMFY_FILES[START_WITH.lower() + '.json'], encoding='utf-8')
     required = {
@@ -135,7 +135,8 @@ def wait_comfy(server):
                 nodes = response.json()
                 required = {'UNETLoader', 'CLIPLoader', 'VAELoader', 'CheckpointLoaderSimple', 'KSampler'}
                 if ENABLE_CHARACTER_WORKFLOW:
-                    character_nodes = {'FaceDetailer', 'UltralyticsDetectorProvider', 'AnimaRefAdapter'}
+                    character_nodes = {'FaceDetailer', 'UltralyticsDetectorProvider', 'AnimaRefAdapter',
+                                       'AxoAnimaLoraStack', 'AxoOptionalAnimaReference'}
                     missing = character_nodes - nodes.keys()
                     if missing:
                         raise RuntimeError('Character workflow nodes failed to load: ' + ', '.join(sorted(missing))

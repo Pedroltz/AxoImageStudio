@@ -14,7 +14,11 @@ def test_reference_workflow_connections_and_refinement_order():
         assert link in nodes[source]['outputs'][slot]['links']
         assert nodes[target]['inputs'][target_slot]['link'] == link
         assert nodes[source]['outputs'][slot]['type'] == nodes[target]['inputs'][target_slot]['type'] == kind
-    adapter = next(n for n in nodes.values() if n['type'] == 'AnimaRefAdapter')
+    adapter = next(n for n in nodes.values() if n['type'] == 'AxoOptionalAnimaReference')
+    assert adapter['widgets_values'][:2] == [False, 'Nenhuma']
+    assert not any(n['type'] == 'LoadImage' for n in nodes.values())
+    loras = next(n for n in nodes.values() if n['type'] == 'AxoAnimaLoraStack')
+    assert loras['widgets_values'] == ['Nenhuma', 0.8, 'Nenhuma', 0.8, 'Nenhuma', 0.8]
     sampler = next(n for n in nodes.values() if n['type'] == 'KSampler')
     assert sampler['inputs'][0]['link'] in adapter['outputs'][0]['links']
     latent = next(n for n in nodes.values() if n['type'] == 'EmptyLatentImage')
@@ -22,6 +26,8 @@ def test_reference_workflow_connections_and_refinement_order():
     hands = next(n for n in nodes.values() if n['type'] == 'FaceDetailer' and 'MÃOS' in n['title'])
     face = next(n for n in nodes.values() if n['type'] == 'FaceDetailer' and 'ROSTO' in n['title'])
     assert face['inputs'][0]['link'] in hands['outputs'][0]['links']
+    assert hands['inputs'][1]['link'] in loras['outputs'][0]['links']
+    assert face['inputs'][1]['link'] in loras['outputs'][0]['links']
     final = next(n for n in nodes.values() if n['type'] == 'SaveImage' and n['widgets_values'] == ['Axo/Personagem/final'])
     assert final['inputs'][0]['link'] in face['outputs'][0]['links']
 

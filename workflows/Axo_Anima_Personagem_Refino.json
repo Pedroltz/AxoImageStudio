@@ -23,9 +23,7 @@
           "name": "MODEL",
           "type": "MODEL",
           "links": [
-            1,
-            14,
-            22
+            1
           ],
           "slot_index": 0
         }
@@ -99,7 +97,7 @@
           "name": "VAE",
           "type": "VAE",
           "links": [
-            2,
+            3,
             11,
             16,
             24
@@ -116,55 +114,61 @@
     },
     {
       "id": 4,
-      "type": "LoadImage",
-      "title": "04 · ENVIE A IMAGEM DA PERSONAGEM",
+      "type": "AxoAnimaLoraStack",
+      "title": "04 · LoRAs OPCIONAIS: até 3, com pesos individuais",
       "pos": [
         420,
         80
       ],
       "size": [
         360,
-        430
+        340
       ],
       "flags": {},
       "order": 3,
       "mode": 0,
-      "inputs": [],
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 1
+        }
+      ],
       "outputs": [
         {
-          "name": "IMAGE",
-          "type": "IMAGE",
+          "name": "MODEL",
+          "type": "MODEL",
           "links": [
-            3
+            2,
+            14,
+            22
           ],
           "slot_index": 0
-        },
-        {
-          "name": "MASK",
-          "type": "MASK",
-          "links": [],
-          "slot_index": 1
         }
       ],
       "properties": {
-        "Node name for S&R": "LoadImage"
+        "Node name for S&R": "AxoAnimaLoraStack"
       },
       "widgets_values": [
-        "reference.png",
-        "image"
+        "Nenhuma",
+        0.8,
+        "Nenhuma",
+        0.8,
+        "Nenhuma",
+        0.8
       ]
     },
     {
       "id": 5,
-      "type": "AnimaRefAdapter",
-      "title": "05 · Identidade e estilo da referência",
+      "type": "AxoOptionalAnimaReference",
+      "title": "05 · IMAGEM OPCIONAL: desligada por padrão",
       "pos": [
         420,
-        560
+        480
       ],
       "size": [
         360,
-        290
+        370
       ],
       "flags": {},
       "order": 4,
@@ -173,16 +177,11 @@
         {
           "name": "model",
           "type": "MODEL",
-          "link": 1
+          "link": 2
         },
         {
           "name": "vae",
           "type": "VAE",
-          "link": 2
-        },
-        {
-          "name": "image",
-          "type": "IMAGE",
           "link": 3
         }
       ],
@@ -197,13 +196,12 @@
         }
       ],
       "properties": {
-        "Node name for S&R": "AnimaRefAdapter"
+        "Node name for S&R": "AxoOptionalAnimaReference"
       },
       "widgets_values": [
-        "anima_ref_adapter_v2_r64.safetensors",
+        false,
+        "Nenhuma",
         4.5,
-        "apg",
-        1.0,
         0.65,
         1.0
       ]
@@ -963,7 +961,7 @@
         "Node name for S&R": "MarkdownNote"
       },
       "widgets_values": [
-        "# Axo · Anima: personagem em novas poses e cenas\nWorkflow experimental. Importar o JSON não instala extensões.\n\n## Instale estes 3 pacotes e reinicie o ComfyUI\n- Anima Ref Adapter: https://github.com/ArcAnima/ComfyUI-Anima-Ref-Adapter\n- Impact Pack: https://github.com/ltdrdata/ComfyUI-Impact-Pack\n- Impact Subpack: https://github.com/ltdrdata/ComfyUI-Impact-Subpack\nNo notebook Axo atualizado, selecione INTERFACE=ComfyUI e mantenha ENABLE_CHARACTER_WORKFLOW=True. Execute Install and launch: os pacotes e pesos serão instalados automaticamente e este workflow aparecerá no menu Workflows.\nEm uma instalação independente, use o ComfyUI Manager ou siga as instruções dos repositórios. Se houver nós vermelhos, falta carregar o pacote correspondente: instale-o, reinicie o servidor e recarregue a página.\n\n## Pesos\nAnima base v1.0 + qwen_3_06b_base + qwen_image_vae:\nhttps://huggingface.co/circlestone-labs/Anima/tree/main/split_files\nO adaptador baixa anima_ref_adapter_v2_r64.safetensors (~183 MB) no primeiro uso, da fonte:\nhttps://huggingface.co/ElectronGirl/anima-ref-adapter\nSe necessário, baixe manualmente para models/loras.\n\nDetecção: coloque face_yolov8n.pt e hand_yolov8n.pt em ComfyUI/models/ultralytics/bbox/:\nhttps://huggingface.co/Bingsu/adetailer/tree/main\nSe já os tem na pasta adetailer do Drive, COPIE para essa pasta ou registre-a como ultralytics_bbox em extra_model_paths.yaml.\nNão precisa de SAM, IPAdapter SDXL ou pesos de refiner SDXL.\n"
+        "# Axo · Anima v2: prompt, LoRAs e imagem opcional\nWorkflow experimental. Importar o JSON não instala extensões.\n\n## Instale estes 3 pacotes e reinicie o ComfyUI\n- Anima Ref Adapter: https://github.com/ArcAnima/ComfyUI-Anima-Ref-Adapter\n- Impact Pack: https://github.com/ltdrdata/ComfyUI-Impact-Pack\n- Impact Subpack: https://github.com/ltdrdata/ComfyUI-Impact-Subpack\nNo notebook Axo atualizado, selecione INTERFACE=ComfyUI e mantenha ENABLE_CHARACTER_WORKFLOW=True. Execute Install and launch: os pacotes e pesos serão instalados automaticamente e este workflow aparecerá no menu Workflows.\nEm uma instalação independente, use o ComfyUI Manager ou siga as instruções dos repositórios. Se houver nós vermelhos, falta carregar o pacote correspondente: instale-o, reinicie o servidor e recarregue a página.\nOs controles AxoAnimaLoraStack e AxoOptionalAnimaReference fazem parte do notebook Axo atualizado. Reexecute Install and launch para instalá-los. Eles não exigem outro pacote do Manager.\n\n## Pesos\nAnima base v1.0 + qwen_3_06b_base + qwen_image_vae:\nhttps://huggingface.co/circlestone-labs/Anima/tree/main/split_files\nO adaptador baixa anima_ref_adapter_v2_r64.safetensors (~183 MB) no primeiro uso, da fonte:\nhttps://huggingface.co/ElectronGirl/anima-ref-adapter\nSe necessário, baixe manualmente para models/loras.\n\nDetecção: coloque face_yolov8n.pt e hand_yolov8n.pt em ComfyUI/models/ultralytics/bbox/:\nhttps://huggingface.co/Bingsu/adetailer/tree/main\nSe já os tem na pasta adetailer do Drive, COPIE para essa pasta ou registre-a como ultralytics_bbox em extra_model_paths.yaml.\nNão precisa de SAM, IPAdapter SDXL ou pesos de refiner SDXL.\n"
       ]
     },
     {
@@ -987,7 +985,7 @@
         "Node name for S&R": "MarkdownNote"
       },
       "widgets_values": [
-        "# Primeiro teste\n1. Em 04, envie uma imagem nítida de UMA personagem (corpo e rosto visíveis, pouco fundo). reference.png é só o nome inicial: substitua pelo seu upload.\n2. Confira os nomes dos três modelos. Em uma instalação padrão são nomes simples; se houver subpastas, selecione a opção correta.\n3. Em 06, descreva a NOVA pose, local e enquadramento. Troque 1girl por 1boy se necessário. Não é necessário repetir roupa ou nome da personagem. Comece com pose simples.\n4. Clique em Run. A referência condiciona o modelo; a geração começa de ruído, não do latent da sua imagem. Assim ela pode mudar a pose e a cena.\n5. Compare as saídas ANTES e FINAL. Ambas são salvas, em Axo/Personagem.\n\n## Ajustes\n- Pouca semelhança: referência mais limpa; ref_guidance 4.5 → 5.5; ref_end 0.65 → 1.0. Mais força também pode copiar estilo/composição ou saturar.\n- Para repetir uma composição: mude randomize para fixed no KSampler.\n- VRAM: batch 1. Comece em 832×1216. Se faltar memória, teste 768×1024 e ref_megapixels 0.5.\n- Este adaptador foi projetado para Anima BASE v1.0. Derivados precisam de teste; não substitua o modelo por SDXL/Flux.\n- Este fluxo recebe a pose por TEXTO. Não inclui OpenPose nem uma segunda imagem para controlar a pose.\n"
+        "# Primeiro teste\n1. SEM IMAGEM (padrão): deixe use_reference desligado no nó 05. Não precisa enviar imagem. Descreva aparência, roupa, pose e cena no prompt 06.\n2. Confira os nomes dos três modelos. Em uma instalação padrão são nomes simples; se houver subpastas, selecione a opção correta.\n3. LoRAs OPCIONAIS: no nó 04 selecione até três LoRAs do Anima. Nenhuma desativa o slot; peso 0 também desativa. Comece com 0.6–0.8 e inclua trigger words no prompt quando a LoRA pedir. Os arquivos vêm das pastas Lora/loras/LyCORIS compartilhadas, incluindo o Drive. Não use LoRAs SDXL/Flux. Não selecione o adaptador de referência como LoRA de estilo.\n4. COM IMAGEM: envie e selecione a imagem no nó 05 e ligue use_reference. Então o prompt pode focar na nova pose/cena. Você pode combinar imagem e LoRAs. Clique em Run: a geração começa de ruído e pode mudar a composição.\n5. Compare as saídas ANTES e FINAL. Ambas são salvas, em Axo/Personagem.\n\n## Ajustes\n- Pouca semelhança: referência mais limpa; ref_guidance 4.5 → 5.5; ref_end 0.65 → 1.0. Mais força também pode copiar estilo/composição ou saturar.\n- Para repetir uma composição: mude randomize para fixed no KSampler.\n- VRAM: batch 1. Comece em 832×1216. Se faltar memória, teste 768×1024 e ref_megapixels 0.5.\n- Este adaptador foi projetado para Anima BASE v1.0. Derivados precisam de teste; não substitua o modelo por SDXL/Flux.\n- Este fluxo recebe a pose por TEXTO. Não inclui OpenPose nem uma segunda imagem para controlar a pose.\n"
       ]
     },
     {
@@ -1011,7 +1009,7 @@
         "Node name for S&R": "MarkdownNote"
       },
       "widgets_values": [
-        "# Mãos → rosto\nSão dois FaceDetailer: o primeiro usa detector de MÃOS, o segundo de ROSTO. Ambos fazem inpaint localizado com o Anima base; o nome FaceDetailer não limita o detector ao rosto.\n- Mãos: denoise 0.35; rosto: 0.22; 20 steps, CFG 4, Euler/simple, cycle 1. Comece assim.\n- Se mudar a identidade/cores: reduza denoise do rosto para 0.15–0.20 e acrescente traços da personagem no prompt local.\n- Se a mão continuar ruim: tente denoise 0.40–0.45, compare ANTES/FINAL. Valores altos podem piorar a pose.\n- Se nada for detectado, a imagem passa sem refinamento. Detectores podem falhar em anime, mãos escondidas ou muito deformadas. Corrigir esses casos pode exigir máscara manual ou nova seed.\n- Para desligar uma etapa, selecione o FaceDetailer e use Bypass (Ctrl+B). O restante do grafo continua conectado.\n- O refinamento usa o modelo BASE sem referência para evitar trazer o corpo inteiro para um recorte do rosto/mão. A identidade depende da imagem gerada e de denoise baixo.\n\nReduz deformações; NÃO garante anatomia perfeita nem identidade idêntica. Não consegue reconstruir com certeza dedos ocultos ou remover todos os membros extras. Este JSON foi validado estruturalmente contra as definições dos nós; geração com GPU ainda não testada aqui.\n\n## Fontes das interfaces\nAnima Ref Adapter: 99c222e1c2da472f4b514583b2dbd1b5afb4bdd9\nImpact Pack: eace4a9059908330936c6514f35f5e0c84935394\nAs fontes acima documentam os nós, parâmetros e limitações. Mantenha ComfyUI e extensões compatíveis/atualizados.\n"
+        "# Mãos → rosto\nSão dois FaceDetailer: o primeiro usa detector de MÃOS, o segundo de ROSTO. Ambos fazem inpaint localizado com o Anima base; o nome FaceDetailer não limita o detector ao rosto.\n- Mãos: denoise 0.35; rosto: 0.22; 20 steps, CFG 4, Euler/simple, cycle 1. Comece assim.\n- Se mudar a identidade/cores: reduza denoise do rosto para 0.15–0.20 e acrescente traços da personagem no prompt local.\n- Se a mão continuar ruim: tente denoise 0.40–0.45, compare ANTES/FINAL. Valores altos podem piorar a pose.\n- Se nada for detectado, a imagem passa sem refinamento. Detectores podem falhar em anime, mãos escondidas ou muito deformadas. Corrigir esses casos pode exigir máscara manual ou nova seed.\n- Para desligar uma etapa, selecione o FaceDetailer e use Bypass (Ctrl+B). O restante do grafo continua conectado.\n- O refinamento usa Anima + as LoRAs selecionadas, sem a referência visual, para evitar trazer o corpo inteiro para um recorte do rosto/mão. A identidade depende da imagem gerada e de denoise baixo. Repita trigger words relevantes nos prompts locais se necessário.\n\nReduz deformações; NÃO garante anatomia perfeita nem identidade idêntica. Não consegue reconstruir com certeza dedos ocultos ou remover todos os membros extras. Este JSON foi validado estruturalmente contra as definições dos nós; geração com GPU ainda não testada aqui.\n\n## Fontes das interfaces\nAnima Ref Adapter: 99c222e1c2da472f4b514583b2dbd1b5afb4bdd9\nImpact Pack: eace4a9059908330936c6514f35f5e0c84935394\nAs fontes acima documentam os nós, parâmetros e limitações. Mantenha ComfyUI e extensões compatíveis/atualizados.\n"
       ]
     }
   ],
@@ -1020,25 +1018,25 @@
       1,
       1,
       0,
-      5,
+      4,
       0,
       "MODEL"
     ],
     [
       2,
+      4,
+      0,
+      5,
+      0,
+      "MODEL"
+    ],
+    [
+      3,
       3,
       0,
       5,
       1,
       "VAE"
-    ],
-    [
-      3,
-      4,
-      0,
-      5,
-      2,
-      "IMAGE"
     ],
     [
       4,
@@ -1122,7 +1120,7 @@
     ],
     [
       14,
-      1,
+      4,
       0,
       13,
       1,
@@ -1186,7 +1184,7 @@
     ],
     [
       22,
-      1,
+      4,
       0,
       16,
       1,
@@ -1326,7 +1324,7 @@
         900
       ]
     },
-    "axo_workflow": "Anima character reference + hands + face / experimental v1",
+    "axo_workflow": "Anima optional reference + 3 optional LoRAs + hands + face / experimental v2",
     "requires": [
       "ComfyUI-Anima-Ref-Adapter",
       "ComfyUI-Impact-Pack",
